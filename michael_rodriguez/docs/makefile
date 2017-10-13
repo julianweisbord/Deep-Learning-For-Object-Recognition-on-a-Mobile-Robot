@@ -15,4 +15,4 @@ dvi:
 	latex ${filename}
 
 clean:
-	rm -f *.pdf *.ps *.dvi *.out *.log *.aux *.bbl *.blg *.pyg *.o *.out *.exe
+	rm -f *.ps *.dvi *.out *.log *.aux *.bbl *.blg *.pyg *.o *.out *.exe
