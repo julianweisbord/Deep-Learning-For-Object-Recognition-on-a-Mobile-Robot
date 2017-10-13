@@ -1,0 +1,48 @@
+\documentclass[a4paper]{article}
+
+%% Language and font encodings
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+
+%% Sets page size and margins
+\usepackage[a4paper,top=3cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+%% Useful packages
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+
+\title{Deep Learning for Object Recognition on a Mobile Robot}
+\author{Julian Weisbord, Miles McCall, Michael Rodriguez}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+For our senior design capstone project, we will build an image classifier on top of an autonomous robot. By leveraging ROS (Robot Operating System) and the existing mobile robot platform, we can devote all of our resources to sequentially training a Convolutional Neural Network (CNN) with online learning (defined below). In this project, we propose a plan of action and several potential solutions to the issues brought about from sequential learning. Additionally, there are multiple environmental variables that must be addressed during training in order to classify everyday objects in a wide variety of settings. To build a robust classifier, we will pursue different methods to train the network with varying occlusions and less than optimal conditions.
+\end{abstract}
+
+\newpage
+
+\section{Definition and Description of Problem}
+
+One of the biggest issues Machine Learning as a whole faces currently is that deep neural networks aren't very amenable to online learning techniques. When new data is passed through the network, weights change via backpropagation and previous "knowledge" is lost. This process is known as Catastrophic Interference and without the ability to sequentially receive and classify new training data, intelligent agents will have to be retrained on the entire data set whenever it is presented with a new input sample to predict.
+
+Most artificial neural networks are based on Batch Learning which is the opposite of Sequential Online Learning. In Batch Learning, a group of training samples is passed through the network all at once, the network weights are optimized, and the CNN is ready to classify data. With Online Learning, the network has the potential to receive significantly more data as time goes on and computational resources aren't as taxed all at once.
+
+Catastrophic Forgetting brought out from Sequential Learning is one of many challenges within machine learning. Our group must also understand and be able to implement algorithms that classify images in 3-space. This task is anything but trivial, identifying one object among several can require a lot of human input. To determine how far away and how large an object is, we must establish a coordinate system from a reference object such as an AR tag. This will show how far away the desired object is because we know where it is in relationship to the reference tag. Another problem is the fact that classifying different objects requires different features to localize and take advantage of. When trying to classify a white floor, depending on the time of day, light may be refracting off of it in a way that makes the floor appear yellow or it could get dirty. It would be a much better choice to determine if a floor is truly a floor based on shape and position in a room. However, when classifying a black mug, it is going to look the same and be invariant to many environmental changes. Therefore, it will be simpler to take a few common household objects that aren't especially difficult to classify and try to make those work with a Sequential Machine Learning architecture.
+
+Without localizing a tight region containing the object of interest, there could be a lot of extraneous data. For this project, we will try our best to provide the classifier with objects that aren't obscured or obstructed by environmental debris. It is possible that some training data could involve multiple objects within the robots view but the majority of the desired object will be in plain view.
+
+
+\section{Proposed Solution}
+To train the CNN we will select a small dataset and strive to pass in as many different types of objects within the same overarching class, e.g. types of chairs. The more different examples of the same object that are trained, the better the overarching classifier, and sub classifiers. Continually training a large volume of data is important but in order to get high rates of classification accuracy, we will train the networks on objects from unusual angles, colors, object orientations, and varying distances.
+
+In addition to classifying a few everyday household objects with high accuracy, this design project will focus on building sub classifiers within an overarching classifier. For example, if one lives with roommates everyone likely has their own mugs, and we can train a CNN to tell individual mugs apart. We will apply different Deep Network architectures to make sure the robot knows the difference between ordinary objects with distinguishing features. To be able to build classifiers that can continuously be trained on new object data sets, we will also implement different solutions to mitigate Catastrophic Interference. This is still a heavily researched area with no answer that covers all bases, we will experiment with different techniques such as Elastic Weight Consolidation, Function Approximation, and Dual Memory Architectures to achieve best results.
+
+\section{Performance Metrics}
+Deep learning with ROS is already being researched in the Personal Robotics Department of OSU, a successful team will collaborate closely with grad students in an effort to build the best classifier. The main performance metrics to consider consist of how our team creates a training framework and how well the neural network architecture classifies several distinct objects. The training dataset must be created with visuals of the object in several different angles/plains of view. The training framework should supplement the current process done in the Robotics Department of OSU. If our team decides to completely change the current training framework, the new framework must provide a noticeable increase to the final rate of classification. Specifically, this classifier should correctly classify at least 3 different object classes, with an average success rate of 80\% or higher. To guarantee the best results, our team will research how different CNN architectures affect the rate of classification and report the advantages and setbacks of each.
+
+\end{document}
