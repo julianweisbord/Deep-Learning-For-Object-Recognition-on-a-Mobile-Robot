@@ -1,0 +1,213 @@
+\documentclass[draftclsnofoot, onecolumn, 10pt, compsoc]{IEEEtran}
+%% Language and font encodings
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[top=0.75in, bottom=0.75in, left=0.75in, right=0.75in]{geometry}
+
+%% Macros
+\newcommand\tab[1][1cm]{\hspace*{#1}}
+
+%% Useful packages
+\usepackage{url}
+\usepackage{pgfgantt}
+\usepackage{comment}
+
+\title{Group 67 - Progress Report}
+\author{
+            Deep Learning for Object Recognition on a Mobile Robot \\
+            Julian Weisbord, Michael Rodriguez, Miles McCall \\
+            Oregon State University \\
+            CS 461 Fall 2017
+		}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The Progress Report is a document that describes the work that has and needs to be done for the project to be successful. This document catalogs the first 10 weeks of research and design, to give readers a feel for the many challenges that must be overcome in order to build an intelligent agent. It includes details about particular obstacles our group has overcome, interesting notes from the recapped weeks, and analysis and reflection on the work done so far. 
+\end{abstract}
+\newpage
+
+
+\tableofcontents
+\newpage
+
+\newpage
+\section{Introduction}
+
+\subsection{Purpose}
+The overall purpose of our research is to take a bare-bones mobile robot (intelligent agent) and train it to recognize the objects in any given environment. We will do this by utilizing several different machine learning algorithms, in an effort to make the robot a more intelligent agent. Currently, robots at the Personal Robotics Lab (PRL) of Oregon State University (OSU) lack the ability to efficiently understand, learn, and classify objects in their environment with a high degree of certainty. By leveraging the Robot Operating System (ROS) and the existing mobile robot platform, we aim to create a software pipeline that sequentially trains Convolutional Neural Networks (CNN's) with different sequential learning techniques to teach the intelligent agent to classify objects in its environment. 
+This document is designed to reflect on all of the progress our group made this term. It covers the portions of the overarching project we addressed this term and details pertaining to them. 
+
+\subsection{Goals}
+This project aims to create a proof-of-concept intelligent robot system that can classify several objects in its environment and continue to learn more about them over time. This research driven project attempts to analyze the benefits of implementing advanced data collection and image classification systems, and to see if they are worth the increased complexity. The primary goal of this research is to have the Fetch robot at the PRL successfully classify objects from 5 distinct object classes with on average 80\% certainty. These object categories are staplers, mugs, chairs, books, and screwdrivers, all of which are common items found in a lab, office, or home environment.
+
+\newpage
+\section{Progress and Current Position}
+
+\subsection{Research}
+% Talk about different aspects of AI that we have researched
+Training robots to take in data and reason like humans isn't a cut and dry task. This requires a high level of knowledge in machine learning, specifically image recognition, and computer vision. Students on this team are heavily researching artificial intelligence and other projects that have similar goals. 
+
+In order to consider our mobile robot intelligent within the scope of this project, it must have "smart" systems in place throughout its main functions. The first task the robot must complete is image gathering within its environment. To make the robot "smarter" at gathering images, we have researched ways to improve its ability to find objects around it. Our group has heavily researched how to implement a system to tag each object in such a way that the robot can sense better where the object is in 3D space. Each method represents different advantages and disadvantages for the robot, with technologies ranging from thermal sensing, to QR, AR, and RFID tags. After gathering images, the agent must then process the collected data with the most advanced methodology the team is capable of implementing within the scope of the project. We must also decide on one, or a select few sequential learning architectures to implement and analyze which is best paired with our base image recognition pipeline. 
+
+\subsection{Data Collection}
+% Talk about how the robot gathers data and how much data
+The image gathering process takes about an hour per object, as the mobile robot must locate, move to the location of the object, and take pictures from roughly 50 different angles. We will create a dataset consisting of multiple objects from multiple object classes. Each object is photographed under a series of light conditions to aid the robots ability to accurately identify objects in different environmental conditions. Our team hopes to find a balance between robustness and efficiency in our final dataset. This would mean there are enough images of each object for the intelligent agent to classify it under varying conditions, while not taking up excessive amounts of hard drive space or requiring too much RAM to load the images. 
+
+\subsection{Design and Implementation}
+% Pipeline Design
+The team has currently invested large amounts of time in the research and design phases, both of which must be mostly completed before implementation begins. Throughout this term, the group prioritized completing assigned documents and logs, researching the different components of the overarching project, and designing each stage of the software pipeline.
+
+This project will implement a top-down system of neural network classifiers with 3 levels. The first level is the overarching classifier which determines the chance the observed object belongs to each class. Once this neural network has an output percentage, it then passes any percent above 50 to the second level of classifiers, which specialize in distinct features of each object class. For example, if there is a 60\% chance the current observed object is a stapler and a 90\% chance it is a book, both will be passed on to the second level. At the end of this stage, a firm decision is made about what class the object belongs to and is then passed to the 3rd and final layer. The 3rd layer of sub-classifiers consist of a neural network that predicts whether or not it has been trained on this specific object before based on the object's individually unique features.
+    
+% No implementation yet but mention our plans?
+At this point in the project timeline, the group is concluding the preliminary research and knowledge accumulation phase, and moving into the data collection implementation. We are following our schedule laid out in the requirements document as closely as possible, trying not to move too fast or too slow through the steps. Moving from fall term to the winter break, we aim to accomplish a large amount of the data collecting while campus and the robotics lab are less busy. Sticking to this schedule, the team would be in position to spend the majority of winter term on the image classification pipeline, the largest and most complicated part of the project. 
+
+\section{Problems}
+% Getting server time, learning how to collect images
+Some problems our team ran into early in our project are: having access to the PR2 robot, and getting the computing power needed to run the resource intensive algorithms. The mobile robots that the Personal Robotics Lab own are waiting to be set up in a testing environment and, unfortunately, the logistics of this setup are mainly out of our control. Additionally, to train and operate multiple Convolutional Neural Networks (CNN's), our team will need graphics processing units (GPU's) with a lot of cores and ram which amount to a significant cost. Because of the price, our team has not yet received access to GPU's that are adequate for this research.
+
+% Not having a lot of time to do research because we've been writing papers
+Lastly, this term was focused on completing assigned works as well as the research and design of the project. In doing so we sacrificed time to work on the actual software. While this is how the class is supposed to be paced to some degree, we want to ensure that going forward we are able to consistently complete goals on time. 
+
+\newpage
+\section{Weekly Summaries}
+
+\subsection{Week 1}
+  \begin{itemize}
+      \item Week 1 primarily consisted of corresponding with the project client, Dr. William Smart, regarding various questions our team had about the project. This is also the week that our team communicated the projects that we are interested in to Professor McGrath.
+      \item Discussed with Dr. Smart the possibilities of switching from the ebola project to the deep learning for object recognition on a mobile robot. 
+      \item Submitted Biographies
+  \end{itemize}
+  
+\subsection{Week 2}
+  \begin{itemize}
+      \item At the beginning of week 2, the team created a machine learning wiki to compile different machine learning tutorials and resources that we find. 
+      \item On October 3rd, we had our first official meeting with Dr. Smart where he recommended several learning resources.
+  \end{itemize}
+  
+\subsection{Week 3}
+  \begin{itemize}
+      \item Submitted Problem Statement (rough draft) and made revisions for the final draft.
+      \item During the second half of the week the team spoke with Dr. Smart's graduate student, Chris, about the project and sent the problem statement to both him and Dr. Smart for review. 
+      \item The group and client agreed to hold meetings on Mondays at noon every other week with Chris and/or Dr. Smart.
+      \item The team met with our TA, who was very informative. 
+      \item At the end of the week, we started the final draft of our problem statement and added it to github. 
+  \end{itemize}
+  
+\subsection{Week 4}
+  \begin{itemize}
+      \item Submitted Problem Statement (final draft)
+      \item This week we focused on narrowing down specific project goals. Our rough draft problem statement was pretty vague but we met with a doctoral student in the College of Robotics and decided to divide the project into three categories. 
+      \begin{enumerate}
+       	\item Overfitting to data in different environmental contexts 
+        \item Testing different online learning models and seeing benefits of each
+        \item Improvements to data capturing. 
+      \end{enumerate}
+      \item TA meeting
+  \end{itemize}
+  
+\subsection{Week 5}
+  \begin{itemize}
+      \item Submitted Requirements Document (rough draft)
+      \item Chris shared his github repo code with the group to review
+      \item TA meeting
+      \item Chris + Dr. Smart meeting
+  \end{itemize}
+  
+\subsection{Week 6}
+  \begin{itemize}
+      \item On week 6, we updated Chris on what has been going on in our project. 
+      \item We also spent a lot of time working on our requirements document and submitted the final draft it on Friday. 
+      \item During the weekend, we established several rules for how our group meets and we all have a better understanding of each others individual goals. We are meeting Mondays, Wednesdays, and some Fridays. 
+      \item At our group meeting this week we discussed neural networks in-depth and started looking into the several different kinds that exist. We decided to look into synthetic gradients by watching a video from  Siraj on YouTube.
+      \item TA meeting
+  \end{itemize}
+  
+\subsection{Week 7}
+  \begin{itemize}
+      \item Researched convolutional neural networks and built a simple dog/cat classifier to show our TA. 
+      \item Our group is looking at common datasets for Machine Learning (ML) such as the MNIST dataset. 
+      \item TA meeting
+      \item Chris + Dr. Smart meeting
+  \end{itemize}
+  
+\subsection{Week 8}
+  \begin{itemize}
+      \item This week, we created our technology review document rough draft
+      \item Met with Chris and Dr. Smart. At this meeting, we received help on the Technology Review. 
+       \item TA meeting
+  \end{itemize}
+  
+\subsection{Week 9}
+  \begin{itemize}
+      \item Submitted Technology Review (final draft) 
+      \item Team agreed to cancel TA meeting
+      \item Had remote team meeting during break instead
+  \end{itemize}
+  
+\subsection{Week 10}
+  \begin{itemize}
+      \item The group designed a rough version of our neural network hierarchy but need to go over the plan with Dr. Smart.
+      \item We wrote and turned in our Design Document final draft. This was a difficult assignment because it required a very large amount of research on each member's part. 
+      \item Completed End of Term Progress Report
+      \item On week 10, we had a phone meeting with Ben and talked about what we were going to do in this class over break.
+  \end{itemize}
+  
+\subsection{Week 11 (Finals)}
+  \begin{itemize}
+      \item Submitted End of Term Progress Report
+  \end{itemize}
+  
+\newpage
+\section{Retrospective of the last Ten Weeks}
+\begin{footnotesize}
+\begin{tabular}{| p{0.3\linewidth} | p{0.3\linewidth} | p{0.3\linewidth} |}
+    \hline
+    Positives 
+    & 
+    Deltas 
+    & 
+    Actions\\
+    \hline
+    The group quickly established agreed upon rules for the team and a solidified work schedule. 
+    & 
+    Changes may need to be made to the projected schedule based on an analysis of the current project state.
+    & 
+    Group members will review our previous documents and confirm the information is still accurate. If the project has changed or been added to, these differences must be reflected in previous documentation as well.\\
+    \hline
+    The group communicated well between members and discussed problems or conflicts. 
+    & 
+    &
+    \\
+    \hline
+    All group members worked to contribute equally to the project and hold each other accountable. 
+    &
+    Continually making sure work on the project is being assigned fairly and with reasonable expectations is a large concern of each team member, and we've strived to maintain this balance. 
+    & 
+    During the research phase of the last ten weeks, all group members worked to get to an equal understanding of the concepts involved in the project. We did this to make sure every member's ability levels were relatively the same, so we can all participate in every part of the pipeline. The group members are, however, moving towards more specific roles when implementing the pipeline, allowing them to focus on their strengths or interests.\\
+    \hline
+    Team members maintained a dialogue between themselves, the client and robotics lab, and the professors. 
+    &  
+    & 
+    \\
+    \hline
+    The group went to office hours, emailed, and asked questions when help was needed.
+    & 
+    Our project is research oriented, which occasionally presented our team with confusing interpretations of the assignment descriptions. 
+    & 
+    To remedy this, the team members routinely checked that the work being done was meeting what was being asked. Certain parts of essays were modified to more closely match the work flow and requirements of a research project.\\
+    \hline
+    The group went through multiple draft cycles for all documents, making sure all requirements were met.
+    & 
+    Most rough drafts were modified heavily throughout the writing process.  
+    & 
+    While discussing design and implementation details with Chris, Dr. Smart, or professor McGrath or Winters, we retroactively modified large portions of our project documents. The group updated documents as we learned more, redesigned aspects, and focused the scope of the project.\\
+    
+   \hline
+\end{tabular}
+\end{footnotesize}
+
+\end{document}
