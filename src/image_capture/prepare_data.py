@@ -87,24 +87,25 @@ class PrepareData():
 
 class Dataset():
     def __init__(self, images, labels, img_names, cls):
-        self._num_examples = images.shape[0]
-        self._images = images
-        self._labels = labels
-        self._img_names = img_names
-        self._cls = cls
-        self._epochs_complete = 0
-        self._index_in_epoch = 0
+        self.num_examples = images.shape[0]
+        self.images = images
+        self.labels = labels
+        self.img_names = img_names
+        self.cls = cls
+        self.epochs_complete = 0
+        self.index_in_epoch = 0
 
     def next_batch(self, batch_size):
         """Return the next `batch_size` examples from this data set."""
-        start = self._index_in_epoch
-        self._index_in_epoch += batch_size
+        start = self.index_in_epoch
+        self.index_in_epoch += batch_size
 
-        if self._index_in_epoch > self._num_examples:
-          self._epochs_complete += 1
-          start = 0
-          self._index_in_epoch = batch_size
-          assert batch_size <= self._num_examples
-        end = self._index_in_epoch
+        if self.index_in_epoch > self.num_examples:
+            self.epochs_complete += 1
+            start = 0
+            self.index_in_epoch = batch_size
+            assert batch_size <= self.num_examples
+        end = self.index_in_epoch
 
-        return self._images[start:end], self._labels[start:end], self._img_names[start:end], self._cls[start:end]
+        # return self.images[start:end], self.labels[start:end], self.img_names[start:end], self.cls[start:end]
+        return self.images[start:end], self.labels[start:end]

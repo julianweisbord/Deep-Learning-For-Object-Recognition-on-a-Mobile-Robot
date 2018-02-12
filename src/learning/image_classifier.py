@@ -1,7 +1,9 @@
 '''
 Created on January 12th, 2018
 author: Julian Weisbord
-sources:
+sources: https://www.tensorflow.org/versions/r1.2/get_started/mnist/pros
+         https://www.tensorflow.org/versions/r1.2/get_started/mnist/beginners
+         https://www.youtube.com/watch?v=mynJtLhhcXk
 description: Convolutional Neural Network Model
 '''
 from image_capture.prepare_data import PrepareData
@@ -15,7 +17,7 @@ IMAGE_WIDTH = 28
 IMAGE_SIZE = 784  # 28 * 28 pixels, might change this
 COLOR_CHANNELS = 3
 WEIGHT_SIZE = 5
-BATCH_SIZE = 128
+BATCH_SIZE = 12
 KEEP_RATE = 0.8
 N_EPOCHS = 15
 FC_NEURON_SIZE = 1024  # Chosen randomly
@@ -36,10 +38,10 @@ BIASES = {
 
 
 def grab_dataset():
-    print("Grabbing Data!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    print("Grabbing Data...")
     image_data = PrepareData()
     train_data, valid_data = image_data.read_train_sets(TRAIN_PATH, CLASSES, VALIDATION_SIZE)
-    print("Done Grabbing Data!!!!!!!!!!!!!11111111!!!!!!!!")
+    # print("Done Grabbing Data!!!!!!!!!!!!!11111111!!!!!!!!")
     return train_data, valid_data
 
 
@@ -47,7 +49,6 @@ def inference_model(x, keep_prob):
     '''
     Create model for inference
     '''
-    train_data, valid_data = grab_dataset()
 
     x = tf.reshape(x, shape=[-1, IMAGE_HEIGHT, IMAGE_WIDTH, COLOR_CHANNELS])  # Reshape to a 28 *28 tensor
     conv1 = tf.nn.relu(conv2d(x, WEIGHTS['W_conv1']) + BIASES['b_conv1'])
@@ -69,14 +70,16 @@ def loss(prediction, y):
 def train(x, y, keep_prob):
     prediction = inference_model(x, keep_prob)
     optimizer,cost = loss(prediction, y)
+    train_data, valid_data = grab_dataset()
 
     with tf.Session() as sess:
-        exit()
         sess.run(tf.global_variables_initializer())
         for epoch in range(N_EPOCHS):
+            print("TEST!!!!!!!!!!!!!!!!!!!!!!!!!")
             epoch_loss = 0
-            for _ in range(int(mnist.train.num_examples / BATCH_SIZE)):
-                epoch_x, epoch_y = mnist.train.next_batch(BATCH_SIZE)
+            for _ in range(int(train_data.num_examples / BATCH_SIZE)):
+                print("Num train data examples!!!!! ", train_data.num_examples)
+                epoch_x, epoch_y = train_data.next_batch(BATCH_SIZE)
                 # _, c = sess.run([optimizer, cost], feed_dict={x: epoch_x, y: epoch_y, keep_prob: KEEP_RATE})
                 _, c = sess.run([optimizer, cost], feed_dict={x: epoch_x, y: epoch_y})
                 epoch_loss += c
@@ -86,7 +89,7 @@ def train(x, y, keep_prob):
         correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
 
         accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
-        print('Accuracy:', accuracy.eval({x:mnist.test.images, y:mnist.test.labels, keep_prob: 1.}))
+        print('Accuracy:', accuracy.eval({x:valid_data.images, y:valid_data.labels, keep_prob: 1.}))
 
 def conv2d(x, W):
     '''
