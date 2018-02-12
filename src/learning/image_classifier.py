@@ -21,14 +21,16 @@ BATCH_SIZE = 12
 KEEP_RATE = 0.8
 N_EPOCHS = 15
 FC_NEURON_SIZE = 1024  # Chosen randomly
+FC_NUM_FEATURES = 2352
 N_CLASSES = len(CLASSES)
 TRAIN_PATH = '../image_data/captured_cropped'
 VALIDATION_SIZE = .2
+LEARNING_RATE = .001
 
 WEIGHTS = {
     'W_conv1':tf.Variable(tf.random_normal([WEIGHT_SIZE, WEIGHT_SIZE, COLOR_CHANNELS, 32])),  # Convolve 5 * 5, take 1 input, produce 32 output features
     'W_conv2':tf.Variable(tf.random_normal([WEIGHT_SIZE, WEIGHT_SIZE, 32, 64])),
-    'W_fc':tf.Variable(tf.random_normal([7*7*64, FC_NEURON_SIZE])),
+    'W_fc':tf.Variable(tf.random_normal([FC_NUM_FEATURES, FC_NEURON_SIZE])),
     'out':tf.Variable(tf.random_normal([FC_NEURON_SIZE, N_CLASSES]))}
 BIASES = {
     'b_conv1':tf.Variable(tf.random_normal([32])),
@@ -40,7 +42,8 @@ BIASES = {
 def grab_dataset():
     print("Grabbing Data...")
     image_data = PrepareData()
-    train_data, valid_data = image_data.read_train_sets(TRAIN_PATH, CLASSES, VALIDATION_SIZE)
+    train_data, valid_data = image_data.read_train_sets(TRAIN_PATH, CLASSES,
+                                (IMAGE_WIDTH, IMAGE_HEIGHT), VALIDATION_SIZE)
     # print("Done Grabbing Data!!!!!!!!!!!!!11111111!!!!!!!!")
     return train_data, valid_data
 
@@ -56,20 +59,29 @@ def inference_model(x, keep_prob):
     conv2 = tf.nn.relu(conv2d(conv1, WEIGHTS['W_conv2']) + BIASES['b_conv2'])
     conv2 = maxpool2d(conv2)
     # All of the neurons in conv2 will connect to every neuron in fc
-    fc = tf.reshape(conv2, [-1, 7*7*64])  # shape is [batch_size, features], -1 makes dynamic batch_size
-    fc = tf.nn.relu(tf.matmul(fc, WEIGHTS['W_fc']) + BIASES['b_fc'])
+    layer_shape = x.get_shape()
+    print("Layer shape after convolution: ", x.get_shape())
+
+    num_features = layer_shape[1:4].num_elements()
+    print("Layer shape 1 to 4", layer_shape[1:4])
+    print("num_features after convolution", num_features)
+    flatten = tf.reshape(conv2, [-1, num_features])  # shape is [batch_size, features], -1 makes dynamic batch_size
+    # fc = tf.reshape(conv2, [-1, 7*7*64])  # shape is [batch_size, features], -1 makes dynamic batch_size
+    fc = tf.nn.relu(tf.matmul(flatten, WEIGHTS['W_fc']) + BIASES['b_fc'])
     # fc = tf.nn.dropout(fc, keep_prob)
+    print("fc shape: ", fc.get_shape())
     output = tf.matmul(fc, WEIGHTS['out']) + BIASES['out']
     return output
 
 def loss(prediction, y):
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y))
-    optimizer = tf.train.AdamOptimizer(learning_rate=.001).minimize(cost)
+    optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost)
     return optimizer, cost
 
 def train(x, y, keep_prob):
     prediction = inference_model(x, keep_prob)
-    optimizer,cost = loss(prediction, y)
+    print("prediction shape: ", prediction.get_shape())
+    optimizer, cost = loss(prediction, y)
     train_data, valid_data = grab_dataset()
 
     with tf.Session() as sess:
@@ -80,6 +92,7 @@ def train(x, y, keep_prob):
             for _ in range(int(train_data.num_examples / BATCH_SIZE)):
                 print("Num train data examples!!!!! ", train_data.num_examples)
                 epoch_x, epoch_y = train_data.next_batch(BATCH_SIZE)
+                print("epoch_x Shape {}, epoch_y Shape {}".format(epoch_x.shape, epoch_y.shape))
                 # _, c = sess.run([optimizer, cost], feed_dict={x: epoch_x, y: epoch_y, keep_prob: KEEP_RATE})
                 _, c = sess.run([optimizer, cost], feed_dict={x: epoch_x, y: epoch_y})
                 epoch_loss += c
@@ -105,7 +118,7 @@ def maxpool2d(x):
     return tf.nn.max_pool(x, ksize=[1,2,2,1], strides=[1,2,2,1], padding='SAME')
 
 def main():
-    x = tf.placeholder(tf.float32, shape=[None, IMAGE_SIZE])
+    x = tf.placeholder(tf.float32, shape=[None, IMAGE_WIDTH, IMAGE_HEIGHT, COLOR_CHANNELS])
     keep_prob = tf.placeholder(tf.float32)
     y = tf.placeholder(tf.float32, shape=[None, N_CLASSES])
 

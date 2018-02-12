@@ -27,9 +27,9 @@ class PrepareData():
         self.valid = None
 
 
-    def read_train_sets(self, train_path, classes, validation_size):
+    def read_train_sets(self, train_path, classes, image_size, validation_size):
 
-        images, labels, img_names, cls = self.load_train(train_path, classes)
+        images, labels, img_names, cls = self.load_train(train_path, image_size, classes)
         images, labels, img_names, cls = shuffle(images, labels, img_names, cls)  # Randomize arrays
 
         if isinstance(validation_size, float):
@@ -50,11 +50,11 @@ class PrepareData():
         data_sets = (self.train, self.valid)
         return data_sets
 
-    def load_train(self, train_path, classes):
+    def load_train(self, train_path, image_size, classes):
         images = []
-        labels = []
-        img_names = []
-        cls = []
+        labels = []  # One hot encoding array
+        img_names = []  # img file base path
+        cls = []  # Classes english name
 
         print('Going to read training images')
         for fields in classes:
@@ -68,7 +68,7 @@ class PrepareData():
                 image = cv2.imread(fl)
                 # cv2.imshow(fl,image)  # Test
                 # k = cv2.waitKey(0)  # Test
-                # image = cv2.resize(image, (image_size, image_size),0,0, cv2.INTER_LINEAR)
+                image = cv2.resize(image, (image_size[0], image_size[1]),0,0, cv2.INTER_LINEAR)
                 image = image.astype(np.float32)
                 image = np.multiply(image, 1.0 / 255.0)
                 images.append(image)
@@ -82,6 +82,7 @@ class PrepareData():
         labels = np.array(labels)
         img_names = np.array(img_names)
         cls = np.array(cls)
+        print("cls: {} labels: {}".format(cls[0], labels[0]))
 
         return images, labels, img_names, cls
 
