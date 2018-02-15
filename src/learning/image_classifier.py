@@ -6,8 +6,9 @@ sources: https://www.tensorflow.org/versions/r1.2/get_started/mnist/pros
          https://www.youtube.com/watch?v=mynJtLhhcXk
 description: Convolutional Neural Network Model
 '''
-from image_capture.prepare_data import PrepareData
 import tensorflow as tf
+from image_capture.prepare_data import PrepareData
+
 
 # Constants
 # CLASSES = ['coffee_mug', 'book', 'chair', 'screwdriver', 'stapler']
@@ -40,17 +41,25 @@ BIASES = {
 
 
 def grab_dataset():
+    '''
+    Description: This function grabs the collected image data from prepare_data.py
+    Return: <Tuple of Datasets> The training and validation datasets.
+    '''
     print("Grabbing Data...")
     image_data = PrepareData()
     train_data, valid_data = image_data.read_train_sets(TRAIN_PATH, CLASSES,
-                                (IMAGE_WIDTH, IMAGE_HEIGHT), VALIDATION_SIZE)
+                                                        (IMAGE_WIDTH, IMAGE_HEIGHT),
+                                                        VALIDATION_SIZE)
     # print("Done Grabbing Data!!!!!!!!!!!!!11111111!!!!!!!!")
     return train_data, valid_data
 
 
-def inference_model(x, keep_prob):
+def model_setup(x, keep_prob):
     '''
-    Create model for inference
+    Description: Create model layers and apply activations.
+    Input: x <Tensor> is the input layer Tensorflow Placeholder,
+               keep_prob <float> is a parameter used for dropout.
+    Return: <Tensor> Softmax predicted class.
     '''
 
     x = tf.reshape(x, shape=[-1, IMAGE_HEIGHT, IMAGE_WIDTH, COLOR_CHANNELS])  # Reshape to a 28 *28 tensor
@@ -74,12 +83,20 @@ def inference_model(x, keep_prob):
     return output
 
 def loss(prediction, y):
+    '''
+    Description: Calculate loss function and perform Gradient Descent
+    Input: prediction <Tensor> softmax prediction, y <Tensor> output layer Placeholder
+    Return: optimizer <Tensor Operation> applies Adam Gradient Descent on the models,
+                cost <Tensor> the cross_entropy loss function
+
+    '''
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y))
     optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost)
     return optimizer, cost
 
 def train(x, y, keep_prob):
-    prediction = inference_model(x, keep_prob)
+    ''''''
+    prediction = model_setup(x, keep_prob)
     print("prediction shape: ", prediction.get_shape())
     optimizer, cost = loss(prediction, y)
     train_data, valid_data = grab_dataset()
