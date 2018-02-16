@@ -22,6 +22,10 @@ import cv2
     # go through all of the image data and write to label_file with new data changes
 
 class PrepareData():
+    '''
+    Description: This class takes a directory of images and converts them into
+                    a numpy matrix of pixels and data labels
+    '''
     def __init__(self):
         self.train = None
         self.valid = None

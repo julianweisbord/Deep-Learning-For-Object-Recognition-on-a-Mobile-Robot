@@ -4,7 +4,9 @@ author: Julian Weisbord
 sources: https://www.tensorflow.org/versions/r1.2/get_started/mnist/pros
          https://www.tensorflow.org/versions/r1.2/get_started/mnist/beginners
          https://www.youtube.com/watch?v=mynJtLhhcXk
-description: Convolutional Neural Network Model
+description: Convolutional Neural Network that takes different images and
+                classifies them into 5 different categories.
+
 '''
 import tensorflow as tf
 from image_capture.prepare_data import PrepareData
@@ -29,7 +31,8 @@ VALIDATION_SIZE = .2
 LEARNING_RATE = .001
 
 WEIGHTS = {
-    'W_conv1':tf.Variable(tf.random_normal([WEIGHT_SIZE, WEIGHT_SIZE, COLOR_CHANNELS, 32])),  # Convolve 5 * 5, take 1 input, produce 32 output features
+    # Take 1 input, produce 32 output features, Convolution window is  WEIGHT_SIZE * WEIGHT_SIZE
+    'W_conv1':tf.Variable(tf.random_normal([WEIGHT_SIZE, WEIGHT_SIZE, COLOR_CHANNELS, 32])),
     'W_conv2':tf.Variable(tf.random_normal([WEIGHT_SIZE, WEIGHT_SIZE, 32, 64])),
     'W_fc':tf.Variable(tf.random_normal([FC_NUM_FEATURES, FC_NEURON_SIZE])),
     'out':tf.Variable(tf.random_normal([FC_NEURON_SIZE, N_CLASSES]))}
@@ -52,7 +55,6 @@ def grab_dataset():
                                                         VALIDATION_SIZE)
     # print("Done Grabbing Data!!!!!!!!!!!!!11111111!!!!!!!!")
     return train_data, valid_data
-
 
 def model_setup(x, keep_prob):
     '''
@@ -95,7 +97,13 @@ def loss(prediction, y):
     return optimizer, cost
 
 def train(x, y, keep_prob):
-    ''''''
+    '''
+    Description: This function iteratively trains the model by applying training samples
+                     and then updates the weights with Gradient Descent.
+    Input: x <Tensor> is the input layer Placeholder, y <Tensor> output layer Placeholder,
+               keep_prob <float> is a parameter used for dropout.
+    Return: None
+    '''
     prediction = model_setup(x, keep_prob)
     print("prediction shape: ", prediction.get_shape())
     optimizer, cost = loss(prediction, y)
@@ -123,16 +131,20 @@ def train(x, y, keep_prob):
 
 def conv2d(x, W):
     '''
-    Convolves the input image with the weight matrix, one pixel at a time.
+    Description: Convolves the input image with the weight matrix, one pixel at a time.
+    Input: x <Tensor> is the input layer Placeholder.
+    Return: <Tensor Operation> A 2d Convolution.
     '''
-    return tf.nn.conv2d(x, W, strides=[1,1,1,1], padding='SAME')
+    return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
 
 def maxpool2d(x):
     '''
-    Maxpooling is used to simplify and take the extreme values. It slides a
+    Description: Maxpooling is used to simplify and take the extreme values. It slides a
     2*2 window 2 pixels at a time.
+    Input: x <Tensor> is the input layer Placeholder.
+    Return: <Tensor Operation> Maxpooling operation with a 2*2 window size and 2*2 strides.
     '''
-    return tf.nn.max_pool(x, ksize=[1,2,2,1], strides=[1,2,2,1], padding='SAME')
+    return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
 def main():
     x = tf.placeholder(tf.float32, shape=[None, IMAGE_WIDTH, IMAGE_HEIGHT, COLOR_CHANNELS])
