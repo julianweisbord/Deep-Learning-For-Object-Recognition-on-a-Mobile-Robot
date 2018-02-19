@@ -32,8 +32,17 @@ class PrepareData():
 
 
     def read_train_sets(self, train_path, classes, image_size, validation_size):
+        '''
+        Description: Helper function to load image data and create validation and training datasets.
+        Input: train_path <string> the path to overacrching folder containing all image files,
+               classes <list of strings> contains the names of the different image categories,
+               image_size <tuple of ints> is the desired width and height of the input image,
+               validation_size <float> is the percent/100 value for what portion of images
+                   are used for validation
+        Return: data_sets <tuple of Dataset() objects> are the training and validation datasets
+        '''
 
-        images, labels, img_names, cls = self.load_train(train_path, image_size, classes)
+        images, labels, img_names, cls = self.load_train(train_path, classes, image_size)
         images, labels, img_names, cls = shuffle(images, labels, img_names, cls)  # Randomize arrays
 
         if isinstance(validation_size, float):
@@ -54,7 +63,14 @@ class PrepareData():
         data_sets = (self.train, self.valid)
         return data_sets
 
-    def load_train(self, train_path, image_size, classes):
+    def load_train(self, train_path, classes, image_size):
+        '''
+        Description: Reads files from different class folders, resizes them, and saves the pixels and labels
+        Input: train_path <string> the path to overacrching folder containing all image files,
+               classes <list of strings> contains the names of the different image categories,
+               image_size <tuple of ints> is the desired width and height of the input image,
+        Return: images, labels, img_names, cls <tuple of lists> ouput pixels and labeling data
+        '''
         images = []
         labels = []  # One hot encoding array
         img_names = []  # img file base path
@@ -66,6 +82,7 @@ class PrepareData():
             print('Now going to read {} files (Index: {})'.format(fields, index))
             img1 = fields + '_1'  # Just do first images for now
             path = os.path.join(train_path, fields, img1, "images", fields)
+            print("PATH", path)
             files = glob.glob(path + '*')
             # print('files:\n', files)
             for fl in files:
@@ -91,6 +108,9 @@ class PrepareData():
         return images, labels, img_names, cls
 
 class Dataset():
+    '''
+    Description:
+    '''
     def __init__(self, images, labels, img_names, cls):
         self.num_examples = images.shape[0]
         self.images = images

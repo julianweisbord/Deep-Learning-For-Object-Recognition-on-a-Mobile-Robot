@@ -24,7 +24,7 @@ BATCH_SIZE = 12
 KEEP_RATE = 0.8
 N_EPOCHS = 15
 FC_NEURON_SIZE = 1024  # Chosen randomly
-FC_NUM_FEATURES = 2352
+FC_NUM_FEATURES = 3136
 N_CLASSES = len(CLASSES)
 TRAIN_PATH = '../image_data/captured_cropped'
 VALIDATION_SIZE = .2
@@ -66,11 +66,15 @@ def model_setup(x, keep_prob):
 
     x = tf.reshape(x, shape=[-1, IMAGE_HEIGHT, IMAGE_WIDTH, COLOR_CHANNELS])  # Reshape to a 28 *28 tensor
     conv1 = tf.nn.relu(conv2d(x, WEIGHTS['W_conv1']) + BIASES['b_conv1'])
+    print("relu'd conv1 shape: ", conv1.shape)
     conv1 = maxpool2d(conv1)
+    print("pool'd conv1 shape: ", conv1.shape)
     conv2 = tf.nn.relu(conv2d(conv1, WEIGHTS['W_conv2']) + BIASES['b_conv2'])
+    print("relu'd conv2 shape: ", conv2.shape)
     conv2 = maxpool2d(conv2)
+    print("pool'd conv2 shape: ", conv2.shape)
     # All of the neurons in conv2 will connect to every neuron in fc
-    layer_shape = x.get_shape()
+    layer_shape = conv2.get_shape()
     print("Layer shape after convolution: ", x.get_shape())
 
     num_features = layer_shape[1:4].num_elements()
@@ -92,6 +96,7 @@ def loss(prediction, y):
                 cost <Tensor> the cross_entropy loss function
 
     '''
+    print("logits shape: {} labels shape: {}".format(prediction.shape, y.shape))
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y))
     optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost)
     return optimizer, cost
@@ -112,14 +117,15 @@ def train(x, y, keep_prob):
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         for epoch in range(N_EPOCHS):
-            print("TEST!!!!!!!!!!!!!!!!!!!!!!!!!")
             epoch_loss = 0
             for _ in range(int(train_data.num_examples / BATCH_SIZE)):
                 print("Num train data examples!!!!! ", train_data.num_examples)
                 epoch_x, epoch_y = train_data.next_batch(BATCH_SIZE)
-                print("epoch_x Shape {}, epoch_y Shape {}".format(epoch_x.shape, epoch_y.shape))
+                # print("epoch_x Shape {}, epoch_y Shape {}".format(epoch_x.shape, epoch_y.shape))
                 # _, c = sess.run([optimizer, cost], feed_dict={x: epoch_x, y: epoch_y, keep_prob: KEEP_RATE})
+                # print("Part 2 logits shape: {} labels shape: {}".format(prediction.shape, y.shape))
                 _, c = sess.run([optimizer, cost], feed_dict={x: epoch_x, y: epoch_y})
+                # print("Part 3 logits shape: {} labels shape: {}".format(prediction.shape, y.shape))
                 epoch_loss += c
 
             print('Epoch', epoch, 'completed out of', N_EPOCHS, 'loss:', epoch_loss)
