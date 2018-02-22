@@ -24,14 +24,15 @@ import cv2
 class PrepareData():
     '''
     Description: This class takes a directory of images and converts them into
-                    a numpy matrix of pixels and data labels
+                    a numpy matrix of pixels and data labels. This class creates
+                    datasets and makes them accessible to the model.
     '''
     def __init__(self):
         self.train = None
         self.valid = None
 
 
-    def read_train_sets(self, train_path, classes, image_size, validation_size):
+    def read_train_sets(self, train_path, num_objects, classes, image_size, validation_size):
         '''
         Description: Helper function to load image data and create validation and training datasets.
         Input: train_path <string> the path to overacrching folder containing all image files,
@@ -42,7 +43,7 @@ class PrepareData():
         Return: data_sets <tuple of Dataset() objects> are the training and validation datasets
         '''
 
-        images, labels, img_names, cls = self.load_train(train_path, classes, image_size)
+        images, labels, img_names, cls = self.load_train(train_path, num_objects, classes, image_size)
         images, labels, img_names, cls = shuffle(images, labels, img_names, cls)  # Randomize arrays
 
         if isinstance(validation_size, float):
@@ -63,7 +64,7 @@ class PrepareData():
         data_sets = (self.train, self.valid)
         return data_sets
 
-    def load_train(self, train_path, classes, image_size):
+    def load_train(self, train_path, num_objects, classes, image_size):
         '''
         Description: Reads files from different class folders, resizes them, and saves the pixels and labels
         Input: train_path <string> the path to overacrching folder containing all image files,
@@ -80,25 +81,26 @@ class PrepareData():
         for fields in classes:
             index = classes.index(fields)
             print('Now going to read {} files (Index: {})'.format(fields, index))
-            img1 = fields + '_1'  # Just do first images for now
-            path = os.path.join(train_path, fields, img1, "images", fields)
-            # print("PATH", path)
-            files = glob.glob(path + '*')
-            # print('files:\n', files)
-            for fl in files:
-                image = cv2.imread(fl)
-                # cv2.imshow(fl,image)  # Test
-                # k = cv2.waitKey(0)  # Test
-                image = cv2.resize(image, (image_size[0], image_size[1]),0,0, cv2.INTER_LINEAR)
-                image = image.astype(np.float32)
-                image = np.multiply(image, 1.0 / 255.0)
-                images.append(image)
-                label = np.zeros(len(classes))
-                label[index] = 1.0
-                labels.append(label)
-                flbase = os.path.basename(fl)  # Name of image
-                img_names.append(flbase)
-                cls.append(fields)
+            for i in range(num_objects):
+                img1 = fields + '_' + i  # Just do first 5 image folders for now
+                path = os.path.join(train_path, fields, img1, "images", fields)
+                # print("PATH", path)
+                files = glob.glob(path + '*')
+                # print('files:\n', files)
+                for fl in files:
+                    image = cv2.imread(fl)
+                    # cv2.imshow(fl,image)  # Test
+                    # k = cv2.waitKey(0)  # Test
+                    image = cv2.resize(image, (image_size[0], image_size[1]), 0, 0, cv2.INTER_LINEAR)
+                    image = image.astype(np.float32)
+                    image = np.multiply(image, 1.0 / 255.0)
+                    images.append(image)
+                    label = np.zeros(len(classes))
+                    label[index] = 1.0
+                    labels.append(label)
+                    flbase = os.path.basename(fl)  # Name of image
+                    img_names.append(flbase)
+                    cls.append(fields)
         images = np.array(images)
         labels = np.array(labels)
         img_names = np.array(img_names)
@@ -109,7 +111,8 @@ class PrepareData():
 
 class Dataset():
     '''
-    Description:
+    Description: Contains a numpy matrix of images, this class defines functions that
+                    access the dataset.
     '''
     def __init__(self, images, labels, img_names, cls):
         self.num_examples = images.shape[0]
@@ -122,7 +125,11 @@ class Dataset():
         self.index_in_epoch = 0
 
     def next_batch(self, batch_size):
-        """Return the next `batch_size` examples from this data set."""
+        '''
+        Description: This function iterates through the images.
+        Input: batch_size <int> the number of images in a batch
+        Return: The next batch_size of examples from the dataset.
+        '''
         start = self.index_in_epoch
         self.index_in_epoch += batch_size
 
@@ -133,5 +140,4 @@ class Dataset():
             assert batch_size <= self.num_examples
         end = self.index_in_epoch
 
-        # return self.images[start:end], self.labels[start:end], self.img_names[start:end], self.cls[start:end]
         return self.images[start:end], self.labels[start:end]

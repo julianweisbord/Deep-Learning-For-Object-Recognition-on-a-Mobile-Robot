@@ -13,11 +13,11 @@ from image_capture.prepare_data import PrepareData
 
 
 # Definitions and Constants
-# CLASSES = ['coffee_mug', 'book', 'chair', 'screwdriver', 'stapler']
 CLASSES = ['bowl', 'calculator', 'cell_phone', 'notebook']
+NUM_OBJECTS = 5  # Number of different objects per object class
 IMAGE_HEIGHT = 56
 IMAGE_WIDTH = 56
-IMAGE_SIZE = 784  # 28 * 28 pixels, might change this
+IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT
 COLOR_CHANNELS = 3
 WEIGHT_SIZE = 5
 BATCH_SIZE = 36
@@ -25,7 +25,7 @@ KEEP_RATE = 0.8
 N_EPOCHS = 60
 FC_NEURON_SIZE = 1024  # Chosen randomly
 N_CLASSES = len(CLASSES)
-FC_NUM_FEATURES = IMAGE_WIDTH * IMAGE_WIDTH * N_CLASSES
+FC_NUM_FEATURES = IMAGE_WIDTH * IMAGE_HEIGHT * N_CLASSES
 TRAIN_PATH = '../image_data/captured_cropped'
 VALIDATION_SIZE = .2
 LEARNING_RATE = .001
@@ -50,10 +50,9 @@ def grab_dataset():
     '''
     print("Grabbing Data...")
     image_data = PrepareData()
-    train_data, valid_data = image_data.read_train_sets(TRAIN_PATH, CLASSES,
+    train_data, valid_data = image_data.read_train_sets(TRAIN_PATH, NUM_OBJECTS, CLASSES,
                                                         (IMAGE_WIDTH, IMAGE_HEIGHT),
                                                         VALIDATION_SIZE)
-    # print("Done Grabbing Data!!!!!!!!!!!!!11111111!!!!!!!!")
     return train_data, valid_data
 
 def model_setup(x, keep_prob):
