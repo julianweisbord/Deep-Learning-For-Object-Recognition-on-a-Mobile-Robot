@@ -11,7 +11,7 @@ import numpy as np
 from sklearn.utils import shuffle
 import cv2
 
-# Plan:
+# Caching Plan:
 # if data is already in a file (first line of label_file is [last_data_change_time, last time file was written to])
     # if last data change made > last time label_file was written to
     #     go through all of the image data and write to label_file with new data changes
@@ -82,7 +82,7 @@ class PrepareData():
             print('Now going to read {} files (Index: {})'.format(fields, index))
             img1 = fields + '_1'  # Just do first images for now
             path = os.path.join(train_path, fields, img1, "images", fields)
-            print("PATH", path)
+            # print("PATH", path)
             files = glob.glob(path + '*')
             # print('files:\n', files)
             for fl in files:
@@ -113,6 +113,7 @@ class Dataset():
     '''
     def __init__(self, images, labels, img_names, cls):
         self.num_examples = images.shape[0]
+        print("Num images!!", self.num_examples)
         self.images = images
         self.labels = labels
         self.img_names = img_names

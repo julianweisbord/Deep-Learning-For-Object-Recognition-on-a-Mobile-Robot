@@ -12,20 +12,20 @@ import tensorflow as tf
 from image_capture.prepare_data import PrepareData
 
 
-# Constants
+# Definitions and Constants
 # CLASSES = ['coffee_mug', 'book', 'chair', 'screwdriver', 'stapler']
 CLASSES = ['bowl', 'calculator', 'cell_phone', 'notebook']
-IMAGE_HEIGHT = 28
-IMAGE_WIDTH = 28
+IMAGE_HEIGHT = 56
+IMAGE_WIDTH = 56
 IMAGE_SIZE = 784  # 28 * 28 pixels, might change this
 COLOR_CHANNELS = 3
 WEIGHT_SIZE = 5
-BATCH_SIZE = 12
+BATCH_SIZE = 36
 KEEP_RATE = 0.8
-N_EPOCHS = 15
+N_EPOCHS = 60
 FC_NEURON_SIZE = 1024  # Chosen randomly
-FC_NUM_FEATURES = 3136
 N_CLASSES = len(CLASSES)
+FC_NUM_FEATURES = IMAGE_WIDTH * IMAGE_WIDTH * N_CLASSES
 TRAIN_PATH = '../image_data/captured_cropped'
 VALIDATION_SIZE = .2
 LEARNING_RATE = .001
@@ -64,7 +64,7 @@ def model_setup(x, keep_prob):
     Return: <Tensor> Softmax predicted class.
     '''
 
-    x = tf.reshape(x, shape=[-1, IMAGE_HEIGHT, IMAGE_WIDTH, COLOR_CHANNELS])  # Reshape to a 28 *28 tensor
+    x = tf.reshape(x, shape=[-1, IMAGE_HEIGHT, IMAGE_WIDTH, COLOR_CHANNELS])
     conv1 = tf.nn.relu(conv2d(x, WEIGHTS['W_conv1']) + BIASES['b_conv1'])
     print("relu'd conv1 shape: ", conv1.shape)
     conv1 = maxpool2d(conv1)
@@ -75,7 +75,7 @@ def model_setup(x, keep_prob):
     print("pool'd conv2 shape: ", conv2.shape)
     # All of the neurons in conv2 will connect to every neuron in fc
     layer_shape = conv2.get_shape()
-    print("Layer shape after convolution: ", x.get_shape())
+    print("Layer shape after convolution: ", layer_shape)
 
     num_features = layer_shape[1:4].num_elements()
     print("Layer shape 1 to 4", layer_shape[1:4])
