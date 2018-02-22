@@ -15,8 +15,8 @@ from image_capture.prepare_data import PrepareData
 # Definitions and Constants
 CLASSES = ['bowl', 'calculator', 'cell_phone', 'notebook']
 NUM_OBJECTS = 5  # Number of different objects per object class
-IMAGE_HEIGHT = 56
-IMAGE_WIDTH = 56
+IMAGE_HEIGHT = 112
+IMAGE_WIDTH = 112
 IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT
 COLOR_CHANNELS = 3
 WEIGHT_SIZE = 5

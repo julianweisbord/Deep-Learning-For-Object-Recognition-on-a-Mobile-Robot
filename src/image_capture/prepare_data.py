@@ -43,8 +43,8 @@ class PrepareData():
         Return: data_sets <tuple of Dataset() objects> are the training and validation datasets
         '''
 
-        images, labels, img_names, cls = self.load_train(train_path, num_objects, classes, image_size)
-        images, labels, img_names, cls = shuffle(images, labels, img_names, cls)  # Randomize arrays
+        images, labels, img_names, class_name = self.load_train(train_path, num_objects, classes, image_size)
+        images, labels, img_names, class_name = shuffle(images, labels, img_names, class_name)  # Randomize arrays
 
         if isinstance(validation_size, float):
             validation_size = int(validation_size * images.shape[0])
@@ -52,15 +52,15 @@ class PrepareData():
         validation_images = images[:validation_size]
         validation_labels = labels[:validation_size]
         validation_img_names = img_names[:validation_size]
-        validation_cls = cls[:validation_size]
+        validation_class_name = class_name[:validation_size]
 
         train_images = images[validation_size:]
         train_labels = labels[validation_size:]
         train_img_names = img_names[validation_size:]
-        train_cls = cls[validation_size:]
+        train_class_name = class_name[validation_size:]
 
-        self.train = Dataset(train_images, train_labels, train_img_names, train_cls)
-        self.valid = Dataset(validation_images, validation_labels, validation_img_names, validation_cls)
+        self.train = Dataset(train_images, train_labels, train_img_names, train_class_name)
+        self.valid = Dataset(validation_images, validation_labels, validation_img_names, validation_class_name)
         data_sets = (self.train, self.valid)
         return data_sets
 
@@ -70,23 +70,22 @@ class PrepareData():
         Input: train_path <string> the path to overacrching folder containing all image files,
                classes <list of strings> contains the names of the different image categories,
                image_size <tuple of ints> is the desired width and height of the input image,
-        Return: images, labels, img_names, cls <tuple of lists> ouput pixels and labeling data
+        Return: images, labels, img_names, class_name <tuple of lists> ouput pixels and labeling data
         '''
         images = []
         labels = []  # One hot encoding array
         img_names = []  # img file base path
-        cls = []  # Classes english name
+        class_name = []  # Classes english name
 
         print('Going to read training images')
         for fields in classes:
             index = classes.index(fields)
             print('Now going to read {} files (Index: {})'.format(fields, index))
             for i in range(num_objects):
-                img1 = fields + '_' + i  # Just do first 5 image folders for now
+                img1 = fields + '_' + str(i)  # Just do first 5 image folders for now
                 path = os.path.join(train_path, fields, img1, "images", fields)
-                # print("PATH", path)
                 files = glob.glob(path + '*')
-                # print('files:\n', files)
+
                 for fl in files:
                     image = cv2.imread(fl)
                     # cv2.imshow(fl,image)  # Test
@@ -100,27 +99,27 @@ class PrepareData():
                     labels.append(label)
                     flbase = os.path.basename(fl)  # Name of image
                     img_names.append(flbase)
-                    cls.append(fields)
+                    class_name.append(fields)
         images = np.array(images)
         labels = np.array(labels)
         img_names = np.array(img_names)
-        cls = np.array(cls)
-        print("cls: {} labels: {}".format(cls[0], labels[0]))
+        class_name = np.array(class_name)
+        print("class_name: {} labels: {}".format(class_name[0], labels[0]))
 
-        return images, labels, img_names, cls
+        return images, labels, img_names, class_name
 
 class Dataset():
     '''
     Description: Contains a numpy matrix of images, this class defines functions that
                     access the dataset.
     '''
-    def __init__(self, images, labels, img_names, cls):
+    def __init__(self, images, labels, img_names, class_name):
         self.num_examples = images.shape[0]
         print("Num images!!", self.num_examples)
         self.images = images
         self.labels = labels
         self.img_names = img_names
-        self.cls = cls
+        self.class_name = class_name
         self.epochs_complete = 0
         self.index_in_epoch = 0
 
