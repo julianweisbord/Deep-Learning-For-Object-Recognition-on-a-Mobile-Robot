@@ -5,6 +5,7 @@ sources: https://github.com/sankit1/cv-tricks.com/tree/master/Tensorflow-tutoria
 description: Module to prepare image data for tensorflow model.
 '''
 
+# External Imports
 import os
 import glob
 import numpy as np
@@ -21,16 +22,17 @@ import cv2
     # train network by parsing images in folders
     # go through all of the image data and write to label_file with new data changes
 
+
 class PrepareData():
     '''
     Description: This class takes a directory of images and converts them into
                     a numpy matrix of pixels and data labels. This class creates
                     datasets and makes them accessible to the model.
     '''
+
     def __init__(self):
         self.train = None
         self.valid = None
-
 
     def read_train_sets(self, train_path, num_objects, classes, image_size, validation_size):
         '''
@@ -48,7 +50,6 @@ class PrepareData():
 
         if isinstance(validation_size, float):
             validation_size = int(validation_size * images.shape[0])
-
         validation_images = images[:validation_size]
         validation_labels = labels[:validation_size]
         validation_img_names = img_names[:validation_size]
@@ -73,11 +74,10 @@ class PrepareData():
         Return: images, labels, img_names, class_name <tuple of lists> ouput pixels and labeling data
         '''
         images = []
-        labels = []  # One hot encoding array
+        labels = []  # One-hot encoding array
         img_names = []  # img file base path
         class_name = []  # Classes english name
 
-        print('Going to read training images')
         for fields in classes:
             index = classes.index(fields)
             print('Now going to read {} files (Index: {})'.format(fields, index))
@@ -86,10 +86,8 @@ class PrepareData():
                 path = os.path.join(train_path, fields, img1, "images", fields)
                 files = glob.glob(path + '*')
 
-                for fl in files:
-                    image = cv2.imread(fl)
-                    # cv2.imshow(fl,image)  # Test
-                    # k = cv2.waitKey(0)  # Test
+                for img in files:
+                    image = cv2.imread(img)
                     image = cv2.resize(image, (image_size[0], image_size[1]), 0, 0, cv2.INTER_LINEAR)
                     image = image.astype(np.float32)
                     image = np.multiply(image, 1.0 / 255.0)
@@ -97,7 +95,7 @@ class PrepareData():
                     label = np.zeros(len(classes))
                     label[index] = 1.0
                     labels.append(label)
-                    flbase = os.path.basename(fl)  # Name of image
+                    flbase = os.path.basename(img)  # Name of image
                     img_names.append(flbase)
                     class_name.append(fields)
         images = np.array(images)
@@ -108,14 +106,15 @@ class PrepareData():
 
         return images, labels, img_names, class_name
 
+
 class Dataset():
     '''
     Description: Contains a numpy matrix of images, this class defines functions that
                     access the dataset.
     '''
+
     def __init__(self, images, labels, img_names, class_name):
         self.num_examples = images.shape[0]
-        print("Num images!!", self.num_examples)
         self.images = images
         self.labels = labels
         self.img_names = img_names

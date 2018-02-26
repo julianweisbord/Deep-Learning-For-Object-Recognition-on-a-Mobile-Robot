@@ -7,4 +7,4 @@ For our senior design capstone project, we will build an image classifier on top
 ### 2. Set PYTHONPATH
     export PYTHONPATH=${PYTHONPATH}:/home/julianweisbord/senior_design/Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot/src
 ### Dependencies - Coming Soon
-![Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot-meme](https://raw.githubusercontent.com/julianweisbord/Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot/initial_model/imgs/meme.jpg)
+![Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot-meme](https://raw.githubusercontent.com/julianweisbord/Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot/master/imgs/meme.jpg)
