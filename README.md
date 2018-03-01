@@ -1,3 +1,11 @@
-# CS 461 Group 67 Repository for Julian Weisbord, Miles McCall, and Michael Rodriguez. 
+# CS 461 Group 67 Repository by Julian Weisbord, Miles McCall, and Michael Rodriguez.
 
-For our senior design capstone project, we will build an image classifier on top of an autonomous robot. By leveraging ROS (Robot Operating System)  and the existing mobile robot platform, we can devote all of our resources to sequentially training a Convolutional Neural Network (CNN) with online learning. In this project, we propose a plan of action and several potential solutions to the issues brought about from sequential learning. Additionally, there are multiple environmental variables that must be addressed during training in order to classify everyday objects in a wide variety of settings. To build a robust classifier, we will pursue three different methods to improve on the current system at the Personal Robotics Lab of OSU. These are: designing new data capture methods, overfitting to data in different environmental contexts using multiple classifiers, and testing different online learning models to achieve the best classification rate.
+For our senior design capstone project, we will build an image classifier on top of an autonomous robot. By leveraging ROS (Robot Operating System) and the existing mobile robot platform, we will provide a Convolutional Neural Network (CNN) model that utilizes online learning so that the robot can continuously learn to recognize objects in its environment.
+
+## Installation
+### 1. git clone this repo
+### 2. pip install -r dependencies.txt
+### 3. Set PYTHONPATH
+    export PYTHONPATH=${PYTHONPATH}:/home/julianweisbord/senior_design/Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot/src
+### More Dependencies - Coming Soon
+![Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot-meme](https://raw.githubusercontent.com/julianweisbord/Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot/master/imgs/meme.jpg)
