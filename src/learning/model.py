@@ -24,7 +24,7 @@ COLOR_CHANNELS = 3
 WEIGHT_SIZE = 5
 BATCH_SIZE = 36
 KEEP_RATE = 0.8
-N_EPOCHS = 60
+N_EPOCHS = 200
 FC_NEURON_SIZE = 1024  # Chosen randomly
 N_CLASSES = len(CLASSES)
 FC_NUM_FEATURES = IMAGE_WIDTH * IMAGE_HEIGHT * N_CLASSES
@@ -87,7 +87,7 @@ def loss(prediction, y):
                 cost <Tensor> the cross_entropy loss function
 
     '''
-    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y))
+    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=prediction, labels=y))
     optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost)
     return optimizer, cost
 
@@ -102,23 +102,28 @@ def train(x, y, keep_prob):
     prediction = model_setup(x, keep_prob)
     optimizer, cost = loss(prediction, y)
     train_data, valid_data = grab_dataset()
+    # Compute the accuracy of the model
+    correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
+    accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         for epoch in range(N_EPOCHS):
-            epoch_loss = 0
-            for _ in range(int(train_data.num_examples / BATCH_SIZE)):
-                print("Num train data examples ", train_data.num_examples)
-                epoch_x, epoch_y = train_data.next_batch(BATCH_SIZE)
-                _, c = sess.run([optimizer, cost], feed_dict={x: epoch_x, y: epoch_y})
-                epoch_loss += c
+            epoch_x, epoch_y = train_data.next_batch(BATCH_SIZE)
+            if epoch % 1 == 0:
+                train_accuracy = accuracy.eval({x:epoch_x, y:epoch_y, keep_prob: 1.0})
+                print('step %d, training accuracy %g' % (epoch, train_accuracy))
+            # epoch_loss = 0
+            # print("Num train data examples ", train_data.num_examples)
+            # for _ in range(int(train_data.num_examples / BATCH_SIZE)):
 
-            print('Epoch', epoch, 'completed out of', N_EPOCHS, 'loss:', epoch_loss)
-        # Compute the accuracy of the model
-        correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
+            sess.run([optimizer, cost], feed_dict={x: epoch_x, y: epoch_y})
 
-        accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
-        print('Accuracy:', accuracy.eval({x:valid_data.images, y:valid_data.labels, keep_prob: 1.}))
+            #     epoch_loss += c
+
+            # print('Epoch', epoch, 'completed out of', N_EPOCHS, 'loss:', epoch_loss)
+
+        print('Test Accuracy:', accuracy.eval({x:valid_data.images, y:valid_data.labels, keep_prob: 1.0}))
 
 def conv2d(x, W):
     '''

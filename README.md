@@ -4,7 +4,8 @@ For our senior design capstone project, we will build an image classifier on top
 
 ## Installation
 ### 1. git clone this repo
-### 2. Set PYTHONPATH
+### 2. pip install -r dependencies.txt
+### 3. Set PYTHONPATH
     export PYTHONPATH=${PYTHONPATH}:/home/julianweisbord/senior_design/Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot/src
-### Dependencies - Coming Soon
+### More Dependencies - Coming Soon
 ![Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot-meme](https://raw.githubusercontent.com/julianweisbord/Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot/master/imgs/meme.jpg)
