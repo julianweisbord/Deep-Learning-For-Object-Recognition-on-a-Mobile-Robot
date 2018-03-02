@@ -10,6 +10,7 @@ description: Convolutional Neural Network that takes different images and
 '''
 
 # External Imports
+import time
 import tensorflow as tf
 # Local Imports
 from image_capture.prepare_data import PrepareData
@@ -22,10 +23,10 @@ IMAGE_WIDTH = 112
 IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT
 COLOR_CHANNELS = 3
 WEIGHT_SIZE = 5
-BATCH_SIZE = 36
+BATCH_SIZE = 50
 KEEP_RATE = 0.8
-N_EPOCHS = 200
-FC_NEURON_SIZE = 1024  # Chosen randomly
+N_EPOCHS = 800
+FC_NEURON_SIZE = 1024  # Chosen randomly for now
 N_CLASSES = len(CLASSES)
 FC_NUM_FEATURES = IMAGE_WIDTH * IMAGE_HEIGHT * N_CLASSES
 TRAIN_PATH = '../image_data/captured_cropped'
@@ -99,6 +100,8 @@ def train(x, y, keep_prob):
                keep_prob <float> is a parameter used for dropout.
     Return: None
     '''
+    start_time = time.time()
+
     prediction = model_setup(x, keep_prob)
     optimizer, cost = loss(prediction, y)
     train_data, valid_data = grab_dataset()
@@ -111,19 +114,13 @@ def train(x, y, keep_prob):
         for epoch in range(N_EPOCHS):
             epoch_x, epoch_y = train_data.next_batch(BATCH_SIZE)
             if epoch % 1 == 0:
-                train_accuracy = accuracy.eval({x:epoch_x, y:epoch_y, keep_prob: 1.0})
+                train_accuracy = accuracy.eval({x:epoch_x, y:epoch_y})
                 print('step %d, training accuracy %g' % (epoch, train_accuracy))
-            # epoch_loss = 0
-            # print("Num train data examples ", train_data.num_examples)
-            # for _ in range(int(train_data.num_examples / BATCH_SIZE)):
-
             sess.run([optimizer, cost], feed_dict={x: epoch_x, y: epoch_y})
 
-            #     epoch_loss += c
-
-            # print('Epoch', epoch, 'completed out of', N_EPOCHS, 'loss:', epoch_loss)
-
         print('Test Accuracy:', accuracy.eval({x:valid_data.images, y:valid_data.labels, keep_prob: 1.0}))
+    end_time = time.time() - start_time
+    print("Total time", end_time)
 
 def conv2d(x, W):
     '''
