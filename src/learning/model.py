@@ -11,6 +11,7 @@ description: Convolutional Neural Network that takes different images and
 
 # External Imports
 import time
+import sys
 import tensorflow as tf
 # Local Imports
 from image_capture.prepare_data import PrepareData
@@ -29,12 +30,12 @@ N_EPOCHS = 800
 FC_NEURON_SIZE = 1024  # Chosen randomly for now
 N_CLASSES = len(CLASSES)
 FC_NUM_FEATURES = IMAGE_WIDTH * IMAGE_HEIGHT * N_CLASSES
-TRAIN_PATH = '../image_data/captured_cropped'
+DEFUALT_TRAIN_PATH = '../image_data/captured_cropped'
 VALIDATION_SIZE = .2
 LEARNING_RATE = .001
 
 WEIGHTS = {
-    # Take 1 input, produce 32 output features, Convolution window is  WEIGHT_SIZE * WEIGHT_SIZE
+    # W_conv1 : Take 1 input, produce 32 output features, Convolution window is  WEIGHT_SIZE * WEIGHT_SIZE
     'W_conv1':tf.Variable(tf.random_normal([WEIGHT_SIZE, WEIGHT_SIZE, COLOR_CHANNELS, 32])),
     'W_conv2':tf.Variable(tf.random_normal([WEIGHT_SIZE, WEIGHT_SIZE, 32, 64])),
     'W_fc':tf.Variable(tf.random_normal([FC_NUM_FEATURES, FC_NEURON_SIZE])),
@@ -46,14 +47,14 @@ BIASES = {
     'out':tf.Variable(tf.random_normal([N_CLASSES]))}
 
 
-def grab_dataset():
+def grab_dataset(train_path):
     '''
     Description: This function grabs the collected image data from prepare_data.py
     Return: <Tuple of Datasets> The training and validation datasets.
     '''
 
     image_data = PrepareData()
-    train_data, valid_data = image_data.read_train_sets(TRAIN_PATH, NUM_OBJECTS, CLASSES,
+    train_data, valid_data = image_data.read_train_sets(train_path, NUM_OBJECTS, CLASSES,
                                                         (IMAGE_WIDTH, IMAGE_HEIGHT),
                                                         VALIDATION_SIZE)
     return train_data, valid_data
@@ -92,7 +93,7 @@ def loss(prediction, y):
     optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost)
     return optimizer, cost
 
-def train(x, y, keep_prob):
+def train(x, y, keep_prob, train_path):
     '''
     Description: This function iteratively trains the model by applying training samples
                      and then updates the weights with Gradient Descent.
@@ -104,7 +105,7 @@ def train(x, y, keep_prob):
 
     prediction = model_setup(x, keep_prob)
     optimizer, cost = loss(prediction, y)
-    train_data, valid_data = grab_dataset()
+    train_data, valid_data = grab_dataset(train_path)
     # Compute the accuracy of the model
     correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
     accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
@@ -140,11 +141,17 @@ def maxpool2d(x):
     return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
 def main():
+    if len(sys.argv) != 2:
+        print("Using default training dataset path")
+        train_path = DEFUALT_TRAIN_PATH
+    else:
+        train_path = sys.argv[1]
+
     x = tf.placeholder(tf.float32, shape=[None, IMAGE_WIDTH, IMAGE_HEIGHT, COLOR_CHANNELS])
     keep_prob = tf.placeholder(tf.float32)
     y = tf.placeholder(tf.float32, shape=[None, N_CLASSES])
 
-    train(x, y, keep_prob)
+    train(x, y, keep_prob, train_path)
 
 
 if __name__ == '__main__':
