@@ -114,9 +114,8 @@ def train(x, y, keep_prob, train_path):
         sess.run(tf.global_variables_initializer())
         for epoch in range(N_EPOCHS):
             epoch_x, epoch_y = train_data.next_batch(BATCH_SIZE)
-            if epoch % 1 == 0:
-                train_accuracy = accuracy.eval({x:epoch_x, y:epoch_y})
-                print('step %d, training accuracy %g' % (epoch, train_accuracy))
+            train_accuracy = accuracy.eval({x:epoch_x, y:epoch_y})
+            print('step %d, training accuracy %g' % (epoch, train_accuracy))
             sess.run([optimizer, cost], feed_dict={x: epoch_x, y: epoch_y})
 
         print('Test Accuracy:', accuracy.eval({x:valid_data.images, y:valid_data.labels, keep_prob: 1.0}))
