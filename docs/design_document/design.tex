@@ -93,9 +93,8 @@ Once image data has been gathered on all 5 object, the images will be used to cr
 \subsection{Image Tagging Techniques}
 Image tagging involves using a marker system that involves a set of patterns that our robot can detect and familiarize itself with. The purpose of having a marker system is that it helps the robot orient itself in the environment that it presides in. For our testing purposes, we want the robot to pin the marker on its coordinate map of the room generated from its sensors. This specific spot on the map will serve as the testing center where we will be placing objects for the robot to train on.
 
-\textbf{\subsubsection{Method}
+\subsubsection{Method}
 Having the robot take more accurate images of the objects in its environment is the primary goal of our data gathering program. In order to do so, our intelligent agent uses ROS libraries to make a radar scan of its environment, identifying all objects that would obstruct its path. After the mobile robot scans the room, we are able to add points of interest in 3D space to the intelligent agent's map. With these tags, the robot can identify objects to classify and take a series of pctures capturing all angles of the object. This tagging system provides us with the most accurate data set for our research with limited oversight of the overall process. 
-}
 
 \subsubsection{Results and Data Analysis}
 Once the fetch robot has successfully been able to locate the object it can begin to create a training data set on it. After the training data set is finished being created, the fetch robot is either going to add on to its pre-existing knowledge of that object or create a new instance of that object under the appropriate image class classifier. In the event that it does not fit either scenario the fetch robot should simply disregard the object. 
