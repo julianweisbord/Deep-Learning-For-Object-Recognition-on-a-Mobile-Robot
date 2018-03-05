@@ -11,7 +11,6 @@ import time
 import sys
 import tensorflow as tf
 from tensorflow.python.platform import tf_logging as logging
-from tensorflow.contrib.framework.python.ops.variables import get_or_create_global_step
 
 
 # Local Imports
@@ -37,7 +36,8 @@ LEARNING_RATE_DECAY_FACTOR = 0.7
 NUM_EPOCHS_BEFORE_DECAY = 2
 # Create the file pattern of your TFRecord files so that it could be recognized later on
 FILE_PATTERN = 'flowers_%s_*.tfrecord'
-CHECKPOINT_FILE = './inception_resnet_v2_2016_08_30.ckpt'
+#install https://github.com/tensorflow/models/tree/master/research/slim
+CHECKPOINT_FILE = './resnet_v2_152.ckpt'
 LOG_DIR = './log'
 
 
@@ -61,27 +61,28 @@ def grab_dataset(train_path):
 #         labels_to_name[int(label)] = string_name
 def retrain(x, train_path):
     train_data, valid_data = grab_dataset(train_path)
-    items_to_descriptions = {
-        'image': '3-channel RGB picture of an object',
-        'label': 'A label that is as such -- 0:bowl, 1:calculator, 2:cell_phone, 3:notebook'
-    }
+    # items_to_descriptions = {
+    #     'image': '3-channel RGB picture of an object',
+    #     'label': 'A label that is as such -- 0:bowl, 1:calculator, 2:cell_phone, 3:notebook'
+    # }
 
     with tf.Graph().as_default() as graph:
         tf.logging.set_verbosity(tf.logging.INFO) #Set the verbosity to INFO level
 
         with tf.contrib.slim.arg_scope(res.inception_resnet_v2_arg_scope()):
-            logits, end_points = res.inception_resnet_v2(x, num_classes=N_CLASSES, is_training=True)
+            logits, end_points = res.inception_resnet_v2(train_data.images, num_classes=N_CLASSES, is_training=True)
         # Restoring the model variables from checkpoint file will result in
             # a number of classes mismatch unless these are excluded.
         exclude = ['InceptionResnetV2/Logits', 'InceptionResnetV2/AuxLogits']
         variables_to_restore = tf.contrib.slim.get_variables_to_restore(exclude=exclude)
 
         one_hot_labels = train_data.labels
+        # tf.nn.softmax_cross_entropy_with_logits_v2
         loss = tf.losses.softmax_cross_entropy(onehot_labels=one_hot_labels, logits=logits)
         total_loss = tf.losses.get_total_loss()    #obtain the regularization losses as well
 
         #Create the global step for monitoring the learning_rate and training.
-        global_step = get_or_create_global_step()
+        global_step = tf.train.get_or_create_global_step()
         num_batches_per_epoch = int(train_data.num_examples /BATCH_SIZE)
         #Define your exponentially decaying learning rate
         lr = tf.train.exponential_decay(
@@ -91,7 +92,7 @@ def retrain(x, train_path):
             decay_rate=LEARNING_RATE_DECAY_FACTOR,
             staircase=True)
         #Now we can define the optimizer that takes on the learning rate
-        optimizer = tf.train.AdamOptimizer(learning_rate = lr)
+        optimizer = tf.train.AdamOptimizer(learning_rate=lr)
         train_op = tf.contrib.slim.learning.create_train_op(total_loss, optimizer)
 
         #State the metrics that you want to predict. We get a predictions that is not one_hot_encoded.
@@ -112,7 +113,7 @@ def retrain(x, train_path):
             return saver.restore(sess, CHECKPOINT_FILE)
 
         #Define your supervisor for running a managed session. Do not run the summary_op automatically or else it will consume too much memory
-        sv = tf.train.Supervisor(logdir = LOG_DIR, summary_op = None, init_fn = restore_fn)
+        sv = tf.train.Supervisor(logdir=LOG_DIR, summary_op=None, init_fn=restore_fn)
 
 
         #Run the managed session
@@ -126,7 +127,10 @@ def retrain(x, train_path):
                     logging.info('Current Streaming Accuracy: %s', accuracy_value)
 
                     # optionally, print your logits and predictions for a sanity check that things are going fine.
-                    logits_value, probabilities_value, predictions_value, labels_value = sess.run([logits, probabilities, predictions, train_data.class_name])
+                    logits_value, probabilities_value, predictions_value, labels_value = sess.run([logits,
+                                                                                                   probabilities,
+                                                                                                   predictions,
+                                                                                                   train_data.class_name])
                     print 'logits: \n', logits_value
                     print 'Probabilities: \n', probabilities_value
                     print 'predictions: \n', predictions_value
@@ -177,8 +181,8 @@ def main():
         train_path = sys.argv[1]
 
     x = tf.placeholder(tf.float32, shape=[None, IMAGE_WIDTH, IMAGE_HEIGHT, COLOR_CHANNELS])
-    keep_prob = tf.placeholder(tf.float32)
-    y = tf.placeholder(tf.float32, shape=[None, N_CLASSES])
+    # keep_prob = tf.placeholder(tf.float32)
+    # y = tf.placeholder(tf.float32, shape=[None, N_CLASSES])
 
     retrain(x, train_path)
 
