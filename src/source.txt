@@ -1,2 +1,2 @@
-  export PYTHONPATH=${PYTHONPATH}:~/classes/capstone/Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot/src/
-  export PYTHONPATH=${PYTHONPATH}:~/classes/capstone/venv/lib/python2.7/site-packages
+export PYTHONPATH=${PYTHONPATH}:~/classes/capstone/Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot/src/
+export PYTHONPATH=${PYTHONPATH}:~/classes/capstone/venv/lib/python2.7/site-packages
