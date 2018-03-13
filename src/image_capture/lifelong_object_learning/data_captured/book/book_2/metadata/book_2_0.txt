@@ -1,0 +1,9 @@
+/home/mccallm/catkin_ws/src/lifelong_object_learning/data/captured/book/book_2/images/book_2_0.png
+480	640
+385	306
+307	222
+332	289
+299	208
+-0.909265642863
+-0.403781858575
+0.176706805944

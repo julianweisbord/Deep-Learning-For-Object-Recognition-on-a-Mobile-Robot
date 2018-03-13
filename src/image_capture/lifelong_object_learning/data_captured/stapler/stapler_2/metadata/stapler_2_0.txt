@@ -1,0 +1,9 @@
+/home/mccallm/catkin_ws/src/lifelong_object_learning/data/captured/stapler/stapler_2/images/stapler_2_0.png
+480	640
+168	420
+252	566
+352	252
+466	341
+0.98057581779
+0.455085321857
+0.103451814254

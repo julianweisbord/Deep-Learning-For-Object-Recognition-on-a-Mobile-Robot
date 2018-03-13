@@ -1,0 +1,9 @@
+/home/mccallm/catkin_ws/src/lifelong_object_learning/data_captured/book/book_4/images/book_4_0.png
+480	640
+165	564
+411	326
+404	276
+220	449
+1.12777526982
+-0.574060359228
+0.119546539377
