@@ -77,8 +77,9 @@ def retrain(x, train_path):
         variables_to_restore = tf.contrib.slim.get_variables_to_restore(exclude=exclude)
 
         one_hot_labels = train_data.labels
+        print("end_points", end_points)
         # tf.nn.softmax_cross_entropy_with_logits_v2
-        loss = tf.losses.softmax_cross_entropy(onehot_labels=one_hot_labels, logits=logits)
+        loss = tf.nn.softmax_cross_entropy_with_logits_v2(onehot_labels=one_hot_labels, logits=logits)
         total_loss = tf.losses.get_total_loss()    #obtain the regularization losses as well
 
         #Create the global step for monitoring the learning_rate and training.
@@ -98,8 +99,8 @@ def retrain(x, train_path):
         #State the metrics that you want to predict. We get a predictions that is not one_hot_encoded.
         predictions = tf.argmax(end_points['Predictions'], 1)
         probabilities = end_points['Predictions']
-        accuracy, accuracy_update = tf.contrib.metrics.streaming_accuracy(predictions,
-                                                                          train_data.class_name)
+        accuracy, accuracy_update = tf.metrics.accuracy(train_data.class_name,
+                                                                          predictions)
         metrics_op = tf.group(accuracy_update, probabilities)
         # Now finally create all the summaries you need to monitor and group them into one summary op.
         tf.summary.scalar('losses/Total_Loss', total_loss)
@@ -182,7 +183,7 @@ def main():
 
     x = tf.placeholder(tf.float32, shape=[None, IMAGE_WIDTH, IMAGE_HEIGHT, COLOR_CHANNELS])
     # keep_prob = tf.placeholder(tf.float32)
-    # y = tf.placeholder(tf.float32, shape=[None, N_CLASSES])
+    #y = tf.placeholder(tf.float32, shape=[None, N_CLASSES])
 
     retrain(x, train_path)
 
