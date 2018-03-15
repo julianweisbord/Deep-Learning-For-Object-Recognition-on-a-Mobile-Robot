@@ -2,8 +2,10 @@
 
   <!-- robot localization and navigation -->
   <include file="$(find fetch_navigation)/launch/fetch_nav.launch">
-    <arg name="map_file" value="$(find lifelong_object_learning)/mapping/graf_HRI_map.yaml"/>
-    <arg name="map_keepout_file" value="$(find lifelong_object_learning)/mapping/graf_HRI_map_keepout.yaml"/>
+    <!-- Be sure to change "name_of_map" with the name of your map-->
+    <arg name="map_file" value="$(find lifelong_object_learning)/mapping/name_of_map.yaml"/>
+    <!-- Be sure to change "name_of_map_keepout" with the name of your map_keepout file -->
+    <arg name="map_keepout_file" value="$(find lifelong_object_learning)/mapping/name_of_map_keepout.yaml"/>
     <arg name="use_keepout" value="true" />
   </include>
 
