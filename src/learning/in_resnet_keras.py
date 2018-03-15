@@ -1,10 +1,25 @@
 #  http://www.image-net.org/
 # https://github.com/fchollet/deep-learning-models/blob/master/inception_resnet_v2.py
-from keras.applications.inception_resnet_v2 import InceptionResNetV2
-from keras import *
-from keras.preprocessing import image
-from keras.applications.inception_resnet_v2 import preprocess_input, decode_predictions
 import numpy as np
+from keras import backend as K
+from keras.layers import Activation
+from keras.layers import AveragePooling2D
+from keras.layers import BatchNormalization
+from keras.layers import Concatenate
+from keras.layers import Conv2D
+from keras.layers import Dense
+from keras.layers import GlobalAveragePooling2D
+from keras.layers import GlobalMaxPooling2D
+from keras.layers import Input
+from keras.layers import Lambda
+from keras.layers import MaxPooling2D
+from keras.models import Model
+from keras.utils.data_utils import get_file
+from keras.engine.topology import get_source_inputs
+from keras.applications.imagenet_utils import _obtain_input_shape
+from keras.applications.imagenet_utils import decode_predictions
+
+
 
 WEIGHTS = 'https://github.com/fchollet/deep-learning-models/releases/inception_resnet_v2_weights_tf_dim_ordering_tf_kernels.h5'
 WEIGHTS_PATH_NO_TOP = 'https://github.com/fchollet/deep-learning-models/releases/inception_resnet_v2_weights_tf_dim_ordering_tf_kernels_notop.h5'
@@ -350,7 +365,39 @@ def InceptionResNetV2(include_top=True,
 
 
 def main():
-    model = InceptionResNetV2(include_top=True, weights='imagenet', classes=5)
+    if len(sys.argv) != 2:
+        print("Using default training dataset path")
+        train_path = DEFUALT_TRAIN_PATH
+    else:
+        train_path = sys.argv[1]
+
+    model = InceptionResNetV2(include_top=True, weights='imagenet', classes=N_CLASSES)
+    # prepare data augmentation configuration
+    train_datagen = ImageDataGenerator(
+            # rescale=1./255,
+            rotation_range=20,
+            width_shift_range=0.2,
+            height_shift_range=0.2,
+            shear_range=0.2,
+            zoom_range=0.2,
+            horizontal_flip=True)
+
+    test_datagen = ImageDataGenerator() #rescale=1./255)
+
+    train_generator = train_datagen.flow_from_directory(
+            train_data_dir,
+            target_size=(img_height, img_width),
+            batch_size=batch_size,
+            class_mode='categorical')
+
+    validation_generator = test_datagen.flow_from_directory(
+            validation_data_dir,
+            target_size=(img_height, img_width),
+            batch_size=batch_size,
+            class_mode='categorical')
+
+
+    model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'], loss_weights=None, sample_weight_mode=None)
 
 # Prediction
 # img_path = 'elephant.jpg'
