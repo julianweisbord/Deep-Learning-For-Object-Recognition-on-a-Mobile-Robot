@@ -24,13 +24,13 @@ IMAGE_WIDTH = 112
 IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT
 COLOR_CHANNELS = 3
 WEIGHT_SIZE = 5
-BATCH_SIZE = 50
+BATCH_SIZE = 50  # Number of images per step or iteration
 KEEP_RATE = 0.8
-N_EPOCHS = 800
+N_EPOCHS = 800  # One iteration over all of the training data
 FC_NEURON_SIZE = 1024  # Chosen randomly for now
 N_CLASSES = len(CLASSES)
 FC_NUM_FEATURES = IMAGE_WIDTH * IMAGE_HEIGHT * N_CLASSES
-DEFUALT_TRAIN_PATH = '../image_data/captured_cropped'
+DEFAULT_TRAIN_PATH = '../image_data/captured_cropped'
 SAVED_MODEL_PATH = 'robot-environment-model'
 VALIDATION_SIZE = .2
 LEARNING_RATE = .001
@@ -146,7 +146,7 @@ def maxpool2d(x):
 def main():
     if len(sys.argv) != 2:
         print("Using default training dataset path")
-        train_path = DEFUALT_TRAIN_PATH
+        train_path = DEFAULT_TRAIN_PATH
     else:
         train_path = sys.argv[1]
 
