@@ -1,5 +1,8 @@
 #  http://www.image-net.org/
 # https://github.com/fchollet/deep-learning-models/blob/master/inception_resnet_v2.py
+import sys
+import os
+import warnings
 import numpy as np
 from keras import backend as K
 from keras.layers import Activation
@@ -18,13 +21,22 @@ from keras.utils.data_utils import get_file
 from keras.engine.topology import get_source_inputs
 from keras.applications.imagenet_utils import _obtain_input_shape
 from keras.applications.imagenet_utils import decode_predictions
-
+from keras.preprocessing.image import ImageDataGenerator
+from keras.callbacks import EarlyStopping, History
 
 
 WEIGHTS = 'https://github.com/fchollet/deep-learning-models/releases/inception_resnet_v2_weights_tf_dim_ordering_tf_kernels.h5'
 WEIGHTS_PATH_NO_TOP = 'https://github.com/fchollet/deep-learning-models/releases/inception_resnet_v2_weights_tf_dim_ordering_tf_kernels_notop.h5'
+BASE_WEIGHT_URL = 'https://github.com/fchollet/deep-learning-models/releases/download/v0.7/'
+DEFAULT_TRAIN_PATH = '../../image_data/train'
+DEFAULT_VAL_PATH = '../../image_data/validation'
 CLASSES = ['bowl', 'calculator', 'cell_phone', 'notebook']
 N_CLASSES = len(CLASSES)
+IMAGE_HEIGHT = 112
+IMAGE_WIDTH = 112
+BATCH_SIZE = 50
+N_EPOCHS = 800
+N_SAMPLES = 1980
 # model = InceptionResNetV2(include_top=True, weights='./inception_resnet_v2_weights_tf_dim_ordering_tf_kernels.h5', input_tensor=None, input_shape=None, pooling=None, classes=1000)
 
 
@@ -65,7 +77,6 @@ def conv2d_bn(x,
         ac_name = None if name is None else name + '_ac'
         x = Activation(activation, name=ac_name)(x)
     return x
-
 
 
 def inception_resnet_block(x, scale, block_type, block_idx, activation='relu'):
@@ -352,7 +363,7 @@ def InceptionResNetV2(include_top=True,
     model.layers.pop()
     print("Number of layers: ", len(model.layers))
     for layer in model.layers:
-        layer.trainable = true
+        layer.trainable = True
     x = Dense(N_CLASSES, activation='softmax', name='predictions')(model.layers[-1].output)
     x.trainable = True
     model = Model(inputs, x)
@@ -367,7 +378,7 @@ def InceptionResNetV2(include_top=True,
 def main():
     if len(sys.argv) != 2:
         print("Using default training dataset path")
-        train_path = DEFUALT_TRAIN_PATH
+        train_path = DEFAULT_TRAIN_PATH
     else:
         train_path = sys.argv[1]
 
@@ -385,19 +396,26 @@ def main():
     test_datagen = ImageDataGenerator() #rescale=1./255)
 
     train_generator = train_datagen.flow_from_directory(
-            train_data_dir,
-            target_size=(img_height, img_width),
-            batch_size=batch_size,
+            DEFAULT_TRAIN_PATH,
+            target_size=(IMAGE_HEIGHT, IMAGE_WIDTH),
+            batch_size=BATCH_SIZE,
             class_mode='categorical')
 
     validation_generator = test_datagen.flow_from_directory(
-            validation_data_dir,
-            target_size=(img_height, img_width),
-            batch_size=batch_size,
+            DEFAULT_VAL_PATH,
+            target_size=(IMAGE_HEIGHT, IMAGE_WIDTH),
+            batch_size=BATCH_SIZE,
             class_mode='categorical')
 
 
     model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'], loss_weights=None, sample_weight_mode=None)
+    model.fit_generator(
+        train_generator,
+        steps_per_epoch= N_SAMPLES // BATCH_SIZE,
+        epochs=N_EPOCHS,
+        callbacks=[EarlyStopping(monitor='val_loss', min_delta=0, patience=2, verbose=0, mode='auto'), History()],
+        validation_data=validation_generator,
+        validation_steps=N_SAMPLES // BATCH_SIZE)
 
 # Prediction
 # img_path = 'elephant.jpg'
