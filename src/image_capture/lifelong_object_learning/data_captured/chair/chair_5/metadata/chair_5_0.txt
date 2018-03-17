@@ -1,0 +1,9 @@
+/home/mccallm/catkin_ws/src/lifelong_object_learning/data_captured/chair/chair_5/images/chair_5_0.png
+480	640
+263	186
+521	293
+471	560
+95	301
+-1.02569001018
+0.590806352096
+0.190830143823
