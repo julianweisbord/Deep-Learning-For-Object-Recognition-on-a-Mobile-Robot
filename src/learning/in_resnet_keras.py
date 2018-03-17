@@ -25,19 +25,17 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.callbacks import EarlyStopping, History
 
 
-WEIGHTS = 'https://github.com/fchollet/deep-learning-models/releases/inception_resnet_v2_weights_tf_dim_ordering_tf_kernels.h5'
-WEIGHTS_PATH_NO_TOP = 'https://github.com/fchollet/deep-learning-models/releases/inception_resnet_v2_weights_tf_dim_ordering_tf_kernels_notop.h5'
 BASE_WEIGHT_URL = 'https://github.com/fchollet/deep-learning-models/releases/download/v0.7/'
-DEFAULT_TRAIN_PATH = '../../image_data/train'
-DEFAULT_VAL_PATH = '../../image_data/validation'
+DEFAULT_TRAIN_PATH = '../image_data/train'
+DEFAULT_VAL_PATH = '../image_data/validation'
 CLASSES = ['bowl', 'calculator', 'cell_phone', 'notebook']
 N_CLASSES = len(CLASSES)
-IMAGE_HEIGHT = 299
-IMAGE_WIDTH = 299
+IMAGE_HEIGHT = 139
+IMAGE_WIDTH = 139
 BATCH_SIZE = 50
-N_EPOCHS = 800
+N_EPOCHS = 10
 N_SAMPLES = 1980
-# model = InceptionResNetV2(include_top=True, weights='./inception_resnet_v2_weights_tf_dim_ordering_tf_kernels.h5', input_tensor=None, input_shape=None, pooling=None, classes=1000)
+INCLUDE_TOP = True
 
 
 def conv2d_bn(x,
@@ -162,6 +160,7 @@ def inception_resnet_block(x, scale, block_type, block_idx, activation='relu'):
 
 def InceptionResNetV2(include_top=True,
                       weights='imagenet',
+                      weights_path=None,
                       input_tensor=None,
                       input_shape=None,
                       pooling=None,
@@ -220,10 +219,6 @@ def InceptionResNetV2(include_top=True,
         raise ValueError('The `weights` argument should be either '
                          '`None` (random initialization) or `imagenet` '
                          '(pre-training on ImageNet).')
-
-    # if weights == 'imagenet' and include_top and classes != 1000:
-    #     raise ValueError('If using `weights` as imagenet with `include_top`'
-    #                      ' as true, `classes` should be 1000')
 
     # Determine proper input shape
     input_shape = _obtain_input_shape(
@@ -334,14 +329,8 @@ def InceptionResNetV2(include_top=True,
     # Create model
     model = Model(inputs, x, name='inception_resnet_v2')
 
-    model.layers.pop()
-    print("Number of layers: ", len(model.layers))
-    for layer in model.layers:
-        layer.trainable = True
-    x = Dense(N_CLASSES, activation='softmax', name='predictions')(model.layers[-1].output)
-    x.trainable = True
+    print("Loading Weights")
 
-    model = Model(inputs, x)
     # Load weights
     if weights == 'imagenet':
         if K.image_data_format() == 'channels_first':
@@ -354,27 +343,21 @@ def InceptionResNetV2(include_top=True,
                               '`image_data_format="channels_last"` in '
                               'your Keras config '
                               'at ~/.keras/keras.json.')
-        if include_top:
-            weights_filename = 'inception_resnet_v2_weights_tf_dim_ordering_tf_kernels.h5'
-            weights_path = get_file(weights_filename,
-                                    BASE_WEIGHT_URL + weights_filename,
-                                    cache_subdir='models',
-                                    md5_hash='e693bd0210a403b3192acc6073ad2e96')
-        else:
-            weights_filename = 'inception_resnet_v2_weights_tf_dim_ordering_tf_kernels_notop.h5'
-            weights_path = get_file(weights_filename,
-                                    BASE_WEIGHT_URL + weights_filename,
-                                    cache_subdir='models',
-                                    md5_hash='d19885ff4a710c122648d3b5c3b684e4')
-        model.load_weights(weights_path)
+    model.load_weights(weights_path)
+    print("Weights loaded successfully")
 
+    model.layers.pop()
+    print("Number of layers: ", len(model.layers))
+    for layer in model.layers:
+        layer.trainable = True
+    x = Dense(N_CLASSES, activation='softmax', name='predictions')(model.layers[-1].output)
+    x.trainable = True
 
+    model = Model(inputs, x)
+    print("Saving Weights: ")
+    model.save_weights('saved_weights.h5')
 
     return model
-
-
-
-
 
 
 def main():
@@ -384,8 +367,28 @@ def main():
     else:
         train_path = sys.argv[1]
 
-    model = InceptionResNetV2(include_top=True, weights='imagenet', classes=N_CLASSES)
+    n_classes = N_CLASSES
+    weights_path = "./saved_weights.h5"
+    if os.path.exists(weights_path) == False:
+        if os.path.exists("./inception_resnet_v2_weights_tf_dim_ordering_tf_kernels.h5") == False:
+            if INCLUDE_TOP is True:
+                weights_filename = 'inception_resnet_v2_weights_tf_dim_ordering_tf_kernels.h5'
+                weights_path = get_file(weights_filename,
+                                        BASE_WEIGHT_URL + weights_filename,
+                                        cache_subdir='models',
+                                        md5_hash='e693bd0210a403b3192acc6073ad2e96')
+            else:
+                weights_filename = 'inception_resnet_v2_weights_tf_dim_ordering_tf_kernels_notop.h5'
+                weights_path = get_file(weights_filename,
+                                        BASE_WEIGHT_URL + weights_filename,
+                                        cache_subdir='models',
+                                        md5_hash='d19885ff4a710c122648d3b5c3b684e4')
+
+        weights_path = " ~/.keras/models//inception_resnet_v2_weights_tf_dim_ordering_tf_kernels.h5"
+        n_classes = 1000
+    model = InceptionResNetV2(include_top=True, weights='imagenet', weights_path=weights_path, classes=n_classes)
     # prepare data augmentation configuration
+    print("Passing images through model")
     train_datagen = ImageDataGenerator(
             # rescale=1./255,
             rotation_range=20,
@@ -394,8 +397,8 @@ def main():
             shear_range=0.2,
             zoom_range=0.2,
             horizontal_flip=True)
-
     test_datagen = ImageDataGenerator() #rescale=1./255)
+    print("After train_datagen")
 
     train_generator = train_datagen.flow_from_directory(
             DEFAULT_TRAIN_PATH,
@@ -418,6 +421,7 @@ def main():
         # callbacks=[EarlyStopping(monitor='val_loss', min_delta=0, patience=2, verbose=0, mode='auto'), History()],
         validation_data=validation_generator,
         validation_steps=N_SAMPLES // BATCH_SIZE)
+    print("After fit_generator")
 
 # Prediction
 # img_path = 'elephant.jpg'
