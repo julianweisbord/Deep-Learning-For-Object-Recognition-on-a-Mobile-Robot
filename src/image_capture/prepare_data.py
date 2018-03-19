@@ -75,7 +75,7 @@ class PrepareData():
         '''
         images = []
         labels = []  # One-hot encoding array
-        img_names = []  # img file base path
+        img_names = []  # img file base path, the png file
         class_name = []  # Classes english name
 
         for fields in classes:
@@ -121,7 +121,9 @@ class Dataset():
         self.class_name = class_name
         self.epochs_complete = 0
         self.index_in_epoch = 0
-
+        print("labels: ", labels[1], "\nEND")
+        print("img names: ", img_names[1], "\END")
+        print("class names: ", class_name[1], "\END")
     def next_batch(self, batch_size):
         '''
         Description: This function iterates through the images.

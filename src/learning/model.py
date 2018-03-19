@@ -24,15 +24,17 @@ IMAGE_WIDTH = 112
 IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT
 COLOR_CHANNELS = 3
 WEIGHT_SIZE = 5
-BATCH_SIZE = 50
+BATCH_SIZE = 50  # Number of images per step or iteration
 KEEP_RATE = 0.8
-N_EPOCHS = 800
+N_EPOCHS = 800  # One iteration over all of the training data
 FC_NEURON_SIZE = 1024  # Chosen randomly for now
 N_CLASSES = len(CLASSES)
 FC_NUM_FEATURES = IMAGE_WIDTH * IMAGE_HEIGHT * N_CLASSES
-DEFUALT_TRAIN_PATH = '../image_data/captured_cropped'
+DEFAULT_TRAIN_PATH = '../image_data/captured_cropped'
+SAVED_MODEL_PATH = 'robot-environment-model'
 VALIDATION_SIZE = .2
 LEARNING_RATE = .001
+
 
 WEIGHTS = {
     # W_conv1 : Take 1 input, produce 32 output features, Convolution window is  WEIGHT_SIZE * WEIGHT_SIZE
@@ -106,6 +108,7 @@ def train(x, y, keep_prob, train_path):
     prediction = model_setup(x, keep_prob)
     optimizer, cost = loss(prediction, y)
     train_data, valid_data = grab_dataset(train_path)
+    save_model = tf.train.Saver()
     # Compute the accuracy of the model
     correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
     accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
@@ -119,6 +122,7 @@ def train(x, y, keep_prob, train_path):
             sess.run([optimizer, cost], feed_dict={x: epoch_x, y: epoch_y})
 
         print('Test Accuracy:', accuracy.eval({x:valid_data.images, y:valid_data.labels, keep_prob: 1.0}))
+        save_model.save(sess, SAVED_MODEL_PATH)
     end_time = time.time() - start_time
     print("Total time", end_time)
 
@@ -142,7 +146,7 @@ def maxpool2d(x):
 def main():
     if len(sys.argv) != 2:
         print("Using default training dataset path")
-        train_path = DEFUALT_TRAIN_PATH
+        train_path = DEFAULT_TRAIN_PATH
     else:
         train_path = sys.argv[1]
 
