@@ -369,8 +369,9 @@ def main():
 
     n_classes = N_CLASSES
     weights_path = "./saved_weights.h5"
-    if os.path.exists(weights_path) == False:
-        if os.path.exists("./inception_resnet_v2_weights_tf_dim_ordering_tf_kernels.h5") == False:
+    if os.path.exists(weights_path) is False:
+        weights_path = "./inception_resnet_v2_weights_tf_dim_ordering_tf_kernels.h5"
+        if os.path.exists("./inception_resnet_v2_weights_tf_dim_ordering_tf_kernels.h5") is False:
             if INCLUDE_TOP is True:
                 weights_filename = 'inception_resnet_v2_weights_tf_dim_ordering_tf_kernels.h5'
                 weights_path = get_file(weights_filename,
@@ -384,7 +385,8 @@ def main():
                                         cache_subdir='models',
                                         md5_hash='d19885ff4a710c122648d3b5c3b684e4')
 
-        weights_path = " ~/.keras/models//inception_resnet_v2_weights_tf_dim_ordering_tf_kernels.h5"
+
+        # weights_path = "~/.keras/models/inception_resnet_v2_weights_tf_dim_ordering_tf_kernels.h5"
         n_classes = 1000
     model = InceptionResNetV2(include_top=True, weights='imagenet', weights_path=weights_path, classes=n_classes)
     # prepare data augmentation configuration

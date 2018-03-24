@@ -1,0 +1,2 @@
+1. Make num_objects in prepare_data.py count the number of object folders rather than assume 5
+2. Investigate how the weights are being loaded in in_resnet.py
