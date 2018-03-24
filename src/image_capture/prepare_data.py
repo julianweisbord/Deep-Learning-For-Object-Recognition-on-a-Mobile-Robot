@@ -81,9 +81,10 @@ class PrepareData():
         for fields in classes:
             index = classes.index(fields)
             print('Now going to read {} files (Index: {})'.format(fields, index))
-            for i in range(num_objects):
-                img1 = fields + '_' + str(i)  # Just do first 5 image folders for now
-                path = os.path.join(train_path, fields, img1, "images", fields)
+            for i in range(1 , num_objects + 1):
+                img1 = fields + '_' + str(i) + '/'  # Just do first 5 image folders for now
+                path = os.path.join(train_path, fields, img1)
+                print("path", path)
                 files = glob.glob(path + '*')
 
                 for img in files:
