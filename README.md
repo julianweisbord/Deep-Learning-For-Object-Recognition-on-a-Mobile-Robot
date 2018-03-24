@@ -10,13 +10,16 @@ For our senior design capstone project, we will build an image classifier on top
 ### 3. Set PYTHONPATH in your .bashrc
 	export PYTHONPATH=${PYTHONPATH}:~/Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot/src
 ### To quickly run the learning models
-Download the image files from https://drive.google.com/drive/folders/1BR0TPG5I_UDa_JNA9NSm8fQuZPBc4DZT?usp=sharing
-mv ~/Downloads/image_data src/
-cd into src/learning and execute: python2 model.py [path to image directory]
-cd into src/learning and execute: python2 in_resnet.py [path to image directory]
+1. Download the image files from https://drive.google.com/drive/folders/1BR0TPG5I_UDa_JNA9NSm8fQuZPBc4DZT?usp=sharing
+and execute: mv ~/Downloads/image_data src/
+
+2. cd into src/learning and execute: python2 model.py [path to image directory]
+
+3. cd into src/learning and execute: python2 in_resnet.py [path to image directory]
 	If the script has trouble downloading the weights file, manually install it from:
 	https://github.com/fchollet/deep-learning-models/releases/download/v0.7/inception_resnet_v2_weights_tf_dim_ordering_tf_kernels.h5
 	then execute: mv ~/Downloads/inception_resnet_v2_weights_tf_dim_ordering_tf_kernels.h5 Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot/src/learning/
+
 ### ROS Dependencies
 For now, this repository only supports Python 2
 
