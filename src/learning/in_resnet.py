@@ -1,8 +1,19 @@
-#  http://www.image-net.org/
-# https://github.com/fchollet/deep-learning-models/blob/master/inception_resnet_v2.py
+'''
+Created on March 10th, 2018
+author: Julian Weisbord
+sources: http://www.image-net.org/
+        https://github.com/fchollet/deep-learning-models/blob/master/inception_resnet_v2.py
+description: Inception ResNet Convolutional Neural Network implementation that takes
+                different images and classifies them into 5 different categories.
+'''
+
+# External Imports
 import sys
 import os
+import time
+import glob
 import warnings
+import shutil
 import numpy as np
 from keras import backend as K
 from keras.layers import Activation
@@ -24,17 +35,20 @@ from keras.applications.imagenet_utils import decode_predictions
 from keras.preprocessing.image import ImageDataGenerator
 from keras.callbacks import EarlyStopping, History
 
+# Local Imports
+import model
+
 
 BASE_WEIGHT_URL = 'https://github.com/fchollet/deep-learning-models/releases/download/v0.7/'
+CLASSES = ['book', 'chair', 'mug', 'screwdriver', 'stapler']
 DEFAULT_TRAIN_PATH = '../image_data/train'
 DEFAULT_VAL_PATH = '../image_data/validation'
-CLASSES = ['bowl', 'calculator', 'cell_phone', 'notebook']
 N_CLASSES = len(CLASSES)
 IMAGE_HEIGHT = 139
 IMAGE_WIDTH = 139
 BATCH_SIZE = 10
 N_EPOCHS = 10
-N_SAMPLES = 1980
+N_SAMPLES = 1757
 INCLUDE_TOP = True
 
 
@@ -46,7 +60,7 @@ def conv2d_bn(x,
               activation='relu',
               use_bias=False,
               name=None):
-    """Utility function to apply conv + BN.
+    '''Utility function to apply conv + BN.
 
     # Arguments
         x: input tensor.
@@ -60,7 +74,7 @@ def conv2d_bn(x,
 
     # Returns
         Output tensor after applying `Conv2D` and `BatchNormalization`.
-    """
+    '''
     x = Conv2D(filters,
                kernel_size,
                strides=strides,
@@ -78,7 +92,7 @@ def conv2d_bn(x,
 
 
 def inception_resnet_block(x, scale, block_type, block_idx, activation='relu'):
-    """Adds a Inception-ResNet block.
+    '''Adds a Inception-ResNet block.
 
     This function builds 3 types of Inception-ResNet blocks mentioned
     in the paper, controlled by the `block_type` argument (which is the
@@ -111,7 +125,7 @@ def inception_resnet_block(x, scale, block_type, block_idx, activation='relu'):
     # Raises
         ValueError: if `block_type` is not one of `'block35'`,
             `'block17'` or `'block8'`.
-    """
+    '''
     if block_type == 'block35':
         branch_0 = conv2d_bn(x, 32, 1)
         branch_1 = conv2d_bn(x, 32, 1)
@@ -165,7 +179,7 @@ def InceptionResNetV2(include_top=True,
                       input_shape=None,
                       pooling=None,
                       classes=1000):
-    """Instantiates the Inception-ResNet v2 architecture.
+    '''Instantiates the Inception-ResNet v2 architecture.
 
     Optionally loads weights pre-trained on ImageNet.
     Note that when using TensorFlow, for best performance you should
@@ -211,7 +225,7 @@ def InceptionResNetV2(include_top=True,
         ValueError: in case of invalid argument for `weights`,
             or invalid input shape.
         RuntimeError: If attempting to run this model with an unsupported backend.
-    """
+    '''
     if K.backend() in {'cntk'}:
         raise RuntimeError(K.backend() + ' backend is currently unsupported for this model.')
 
@@ -359,19 +373,59 @@ def InceptionResNetV2(include_top=True,
 
     return model
 
+def setup_image_dir(train_path, val_path):
+    '''
+    Description: Takes the directory structure for training and validation images used
+                    in model.py and converts them into the structure that keras expects
+                    at the locations: train_path, val_path.
+    Input: train_path <string> path to directory where training data should be stored.
+               val_path <string> path to directory where validation data should be stored.
+    Return: None
+    '''
+
+    files = glob.glob(train_path + '/*')
+    # Create file directory structure
+    print("len files: ", len(files))
+    if not files:
+        # Check if there is an image directory that model.py uses
+            # then copy those images
+        if os.path.exists(model.DEFAULT_TRAIN_PATH):
+            print("model's train path exists")
+            for field in CLASSES:
+                for i in range(1, N_CLASSES + 1):
+                    img = field + '_' + str(i) + '/images/'
+                    path = os.path.join(model.DEFAULT_TRAIN_PATH, field, img)
+                    print("path", path)
+                    files = glob.glob(path + '*')
+                    train_dest = train_path + "/" + field + "/"
+                    val_dest = val_path + "/" + field + "/"
+                    print("base dest: ", train_dest)
+                    if not os.path.exists(train_dest):
+                        os.mkdir(train_dest)
+                    if not os.path.exists(val_dest):
+                        os.mkdir(val_dest)
+                    for fl in files:
+                        print("file", fl)
+                        shutil.copy(fl, train_dest)
+                        shutil.copy(fl, val_dest)
 
 def main():
-    if len(sys.argv) != 2:
+    val_path = DEFAULT_VAL_PATH
+    if len(sys.argv) < 2:
         print("Using default training dataset path")
         train_path = DEFAULT_TRAIN_PATH
     else:
         train_path = sys.argv[1]
+        if len(sys.argv) == 3:
+            val_path = sys.argv[2]
 
+    setup_image_dir(train_path, val_path)  # Check if the image directory structure exists
+    # Locate and load weights:
     n_classes = N_CLASSES
     weights_path = "./saved_weights.h5"
-    if os.path.exists(weights_path) is False:
+    if not os.path.exists(weights_path):
         weights_path = "./inception_resnet_v2_weights_tf_dim_ordering_tf_kernels.h5"
-        if os.path.exists("./inception_resnet_v2_weights_tf_dim_ordering_tf_kernels.h5") is False:
+        if not os.path.exists("./inception_resnet_v2_weights_tf_dim_ordering_tf_kernels.h5"):
             if INCLUDE_TOP is True:
                 weights_filename = 'inception_resnet_v2_weights_tf_dim_ordering_tf_kernels.h5'
                 weights_path = get_file(weights_filename,
@@ -384,46 +438,52 @@ def main():
                                         BASE_WEIGHT_URL + weights_filename,
                                         cache_subdir='models',
                                         md5_hash='d19885ff4a710c122648d3b5c3b684e4')
-
-
-        # weights_path = "~/.keras/models/inception_resnet_v2_weights_tf_dim_ordering_tf_kernels.h5"
         n_classes = 1000
-    model = InceptionResNetV2(include_top=True, weights='imagenet', weights_path=weights_path, classes=n_classes)
+
+    model = InceptionResNetV2(include_top=True, weights='imagenet',
+                              weights_path=weights_path,
+                              classes=n_classes)
+
     # prepare data augmentation configuration
     print("Passing images through model")
     train_datagen = ImageDataGenerator(
-            # rescale=1./255,
-            rotation_range=20,
-            width_shift_range=0.2,
-            height_shift_range=0.2,
-            shear_range=0.2,
-            zoom_range=0.2,
-            horizontal_flip=True)
+        # rescale=1./255,
+        rotation_range=20,
+        width_shift_range=0.2,
+        height_shift_range=0.2,
+        shear_range=0.2,
+        zoom_range=0.2,
+        horizontal_flip=True)
     test_datagen = ImageDataGenerator() #rescale=1./255)
-    print("After train_datagen")
 
     train_generator = train_datagen.flow_from_directory(
-            DEFAULT_TRAIN_PATH,
-            target_size=(IMAGE_HEIGHT, IMAGE_WIDTH),
-            batch_size=BATCH_SIZE,
-            class_mode='categorical')
+        DEFAULT_TRAIN_PATH,
+        target_size=(IMAGE_HEIGHT, IMAGE_WIDTH),
+        batch_size=BATCH_SIZE,
+        class_mode='categorical')
 
     validation_generator = test_datagen.flow_from_directory(
-            DEFAULT_VAL_PATH,
-            target_size=(IMAGE_HEIGHT, IMAGE_WIDTH),
-            batch_size=BATCH_SIZE,
-            class_mode='categorical')
+        DEFAULT_VAL_PATH,
+        target_size=(IMAGE_HEIGHT, IMAGE_WIDTH),
+        batch_size=BATCH_SIZE,
+        class_mode='categorical')
 
 
-    model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'], loss_weights=None, sample_weight_mode=None)
+    model.compile(optimizer='rmsprop',
+                  loss='categorical_crossentropy',
+                  metrics=['accuracy'],
+                  loss_weights=None,
+                  sample_weight_mode=None)
+
+    start_time = time.time()
     model.fit_generator(
         train_generator,
-        steps_per_epoch= N_SAMPLES // BATCH_SIZE,
+        steps_per_epoch=N_SAMPLES // BATCH_SIZE,
         epochs=N_EPOCHS,
-        # callbacks=[EarlyStopping(monitor='val_loss', min_delta=0, patience=2, verbose=0, mode='auto'), History()],
         validation_data=validation_generator,
         validation_steps=N_SAMPLES // BATCH_SIZE)
-    print("After fit_generator")
+    end_time = time.time() - start_time
+    print("Total time", end_time)
 
 # Prediction
 # img_path = 'elephant.jpg'
