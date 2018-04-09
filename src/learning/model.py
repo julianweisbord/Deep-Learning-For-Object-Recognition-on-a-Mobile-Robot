@@ -39,15 +39,15 @@ LEARNING_RATE = .001
 
 WEIGHTS = {
     # W_conv1 : Take 1 input, produce 32 output features, Convolution window is  WEIGHT_SIZE * WEIGHT_SIZE
-    'W_conv1':tf.Variable(tf.random_normal([WEIGHT_SIZE, WEIGHT_SIZE, COLOR_CHANNELS, 32])),
-    'W_conv2':tf.Variable(tf.random_normal([WEIGHT_SIZE, WEIGHT_SIZE, 32, 64])),
-    'W_fc':tf.Variable(tf.random_normal([FC_NUM_FEATURES, FC_NEURON_SIZE])),
-    'out':tf.Variable(tf.random_normal([FC_NEURON_SIZE, N_CLASSES]))}
+    'W_conv1':tf.Variable(tf.random_normal([WEIGHT_SIZE, WEIGHT_SIZE, COLOR_CHANNELS, 32]), name='w1'),
+    'W_conv2':tf.Variable(tf.random_normal([WEIGHT_SIZE, WEIGHT_SIZE, 32, 64]), name='w2'),
+    'W_fc':tf.Variable(tf.random_normal([FC_NUM_FEATURES, FC_NEURON_SIZE]), name='w_fc'),
+    'out':tf.Variable(tf.random_normal([FC_NEURON_SIZE, N_CLASSES]), name='w_softmax')}
 BIASES = {
-    'b_conv1':tf.Variable(tf.random_normal([32])),
-    'b_conv2':tf.Variable(tf.random_normal([64])),
-    'b_fc':tf.Variable(tf.random_normal([FC_NEURON_SIZE])),
-    'out':tf.Variable(tf.random_normal([N_CLASSES]))}
+    'b_conv1':tf.Variable(tf.random_normal([32]), name='b1'),
+    'b_conv2':tf.Variable(tf.random_normal([64]), name='b2'),
+    'b_fc':tf.Variable(tf.random_normal([FC_NEURON_SIZE]), name='b_fc'),
+    'out':tf.Variable(tf.random_normal([N_CLASSES]), name='b_softmax')}
 
 
 def grab_dataset(train_path):
@@ -71,16 +71,19 @@ def model_setup(x, keep_prob):
     '''
 
     x = tf.reshape(x, shape=[-1, IMAGE_HEIGHT, IMAGE_WIDTH, COLOR_CHANNELS])
-    conv1 = tf.nn.relu(conv2d(x, WEIGHTS['W_conv1']) + BIASES['b_conv1'])
-    conv1 = maxpool2d(conv1)
-    conv2 = tf.nn.relu(conv2d(conv1, WEIGHTS['W_conv2']) + BIASES['b_conv2'])
-    conv2 = maxpool2d(conv2)
+    with tf.name_scope('Convolution1'):
+        conv1 = tf.nn.relu(conv2d(x, WEIGHTS['W_conv1']) + BIASES['b_conv1'])
+        conv1 = maxpool2d(conv1)
+    with tf.name_scope('Convolution2'):
+        conv2 = tf.nn.relu(conv2d(conv1, WEIGHTS['W_conv2']) + BIASES['b_conv2'])
+        conv2 = maxpool2d(conv2)
     conv2shape = conv2.get_shape().as_list()
     print("conv2shape: ", conv2shape)
     # All of the neurons in conv2 will connect to every neuron in fc
     flatten = tf.reshape(conv2, [-1, conv2shape[1] * conv2shape[2] * conv2shape[3]])
     print("flatten shape", flatten.get_shape())
-    fc = tf.nn.relu(tf.matmul(flatten, WEIGHTS['W_fc']) + BIASES['b_fc'])
+    with tf.name_scope('FullyConnected'):
+        fc = tf.nn.relu(tf.matmul(flatten, WEIGHTS['W_fc']) + BIASES['b_fc'])
     output = tf.matmul(fc, WEIGHTS['out']) + BIASES['out']
     print("output shape:", output.shape)
     return output
@@ -93,8 +96,10 @@ def loss(prediction, y):
                 cost <Tensor> the cross_entropy loss function
 
     '''
-    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=prediction, labels=y))
-    optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost)
+    with tf.name_scope('CrossEntropy'):
+        cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=prediction, labels=y))
+    with tf.name_scope('Train'):
+        optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost)
     return optimizer, cost
 
 def train(x, y, keep_prob, train_path):
@@ -113,8 +118,10 @@ def train(x, y, keep_prob, train_path):
     save_model = tf.train.Saver()
 
     # Compute the accuracy of the model
-    correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
-    accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
+    with tf.name_scope('Accuracy'):
+        correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
+        accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
+    writer = tf.summary.FileWriter("../vis/tfviz1")
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
@@ -126,6 +133,7 @@ def train(x, y, keep_prob, train_path):
             sess.run([optimizer, cost], feed_dict={x: epoch_x, y: epoch_y})
         print('Test Accuracy:', accuracy.eval({x:valid_data.images, y:valid_data.labels, keep_prob: 1.0}))
         save_model.save(sess, SAVED_MODEL_PATH)
+        writer.add_graph(sess.graph)
     end_time = time.time() - start_time
     print("Total time", end_time)
 
