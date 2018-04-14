@@ -11,8 +11,7 @@ import sys
 import numpy as np
 import tensorflow as tf
 # Local Imports
-#import novel_image
-from novel_image import append_novel_images
+from image_capture.novel_image_prep import PrepareNovelData
 
 # Definitions and Constants
 IMAGE_HEIGHT = 112
@@ -20,14 +19,14 @@ IMAGE_WIDTH = 112
 COLOR_CHANNELS = 3
 SAVED_MODEL_PATH = 'robot-environment-model'
 
-def grab_dataset(class_name, dataset_path):
+def grab_dataset(dataset_path):
     '''
     Description: This function grabs the collected image data from novel_image_prep.py
     Return: <Tuple of Datasets> The training and validation datasets.
     '''
-    train_data, valid_data = append_novel_images(class_name, dataset_path)
 
-    return train_data
+    pred_data = PrepareNovelData(dataset_path)
+    return pred_data
 
 def classify(dataset):
     x_batch = tf.reshape(dataset, shape=[-1, IMAGE_HEIGHT, IMAGE_WIDTH, COLOR_CHANNELS])
@@ -46,11 +45,10 @@ def classify(dataset):
     return prediction
 
 def main():
-    if len(sys.argv) <= 2:
+    if len(sys.argv) != 2:
         print("Please provide the path to your dataset")
         exit()
-    dataset = grab_dataset(sys.argv[1], sys.argv[2])
-    print dataset
+    dataset = grab_dataset(sys.argv[1])
     prediction = classify(dataset)
     print("Prediction: ", prediction)
 
