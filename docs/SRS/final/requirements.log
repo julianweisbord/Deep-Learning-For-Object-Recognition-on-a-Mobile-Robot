@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.5.23)  16 APR 2018 22:21
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.5.23)  17 APR 2018 16:15
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -606,8 +606,7 @@ File: pgfcalendar.code.tex 2007/07/23 v3.0.1a (rcs-revision 1.11)
 ) (/usr/local/texlive/2017/texmf-dist/tex/latex/comment/comment.sty
 \CommentStream=\write4
 
-Excluding comment 'comment')
-No file requirements.aux.
+Excluding comment 'comment') (./requirements.aux)
 \openout1 = `requirements.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 24.
@@ -622,6 +621,7 @@ LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 24.
 LaTeX Font Info:    ... okay on input line 24.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 24.
 LaTeX Font Info:    ... okay on input line 24.
+
 -- Lines per column: 39 (approximate, difference = 14.73578pt).
 (/usr/local/texlive/2017/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
@@ -737,79 +737,44 @@ LaTeX Font Info:    Font shape `OT1/phv/bx/n' in size <11.04124> not available
 LaTeX Font Info:    Font shape `OT1/phv/bx/sc' in size <11.04124> not available
 
 (Font)              Font shape `OT1/phv/b/sc' tried instead on input line 32.
+ (./requirements.toc
+LaTeX Font Info:    Calculating math sizes for size <9.53561> on input line 3.
+)
+\tf@toc=\write5
+\openout5 = `requirements.toc'.
 
-Underfull \hbox (badness 10000) in paragraph at lines 33--46
-
- []
 
 [2]
 LaTeX Font Info:    Font shape `OT1/phv/bx/n' in size <9.53561> not available
-(Font)              Font shape `OT1/phv/b/n' tried instead on input line 49.
+(Font)              Font shape `OT1/phv/b/n' tried instead on input line 36.
 
 
-LaTeX Warning: Citation `neuralnets' on page 3 undefined on input line 62.
+LaTeX Warning: Citation `neuralnets' on page 3 undefined on input line 50.
 
 
-LaTeX Warning: Citation `Norvig' on page 3 undefined on input line 68.
-
-
-LaTeX Warning: Citation `ImgRecog' on page 3 undefined on input line 70.
-
-
-LaTeX Warning: Citation `miller' on page 3 undefined on input line 71.
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 54--72
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 54--72
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 54--72
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 54--72
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 54--72
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 54--72
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 54--72
-
- []
+LaTeX Warning: Citation `Norvig' on page 3 undefined on input line 56.
 
 [3]
-No file requirements.bbl.
-LaTeX Font Info:    Calculating math sizes for size <9.53561> on input line 78.
 
-[4] [5] Excluding 'comment' comment. [6] (./requirements.aux)
+LaTeX Warning: Citation `ImgRecog' on page 4 undefined on input line 58.
+
+
+LaTeX Warning: Citation `miller' on page 4 undefined on input line 59.
+
+No file requirements.bbl.
+[4] [5] [6] (./requirements.aux)
 
 LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 16156 strings out of 492995
- 331477 string characters out of 6132704
+ 16160 strings out of 492995
+ 331539 string characters out of 6132704
  387036 words of memory out of 5000000
- 19404 multiletter control sequences out of 15000+600000
+ 19403 multiletter control sequences out of 15000+600000
  41430 words of font info for 91 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 62i,7n,65p,958b,689s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 62i,7n,65p,976b,689s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2017/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
 exlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/local/tex
 live/2017/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></usr/local/texlive/20
@@ -817,7 +782,7 @@ live/2017/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></usr/local/texlive/20
 f-dist/fonts/type1/urw/palatino/uplb8a.pfb></usr/local/texlive/2017/texmf-dist/
 fonts/type1/urw/palatino/uplr8a.pfb></usr/local/texlive/2017/texmf-dist/fonts/t
 ype1/urw/zapfding/uzdr.pfb>
-Output written on requirements.pdf (6 pages, 79595 bytes).
+Output written on requirements.pdf (6 pages, 86082 bytes).
 PDF statistics:
  51 PDF objects out of 1000 (max. 8388607)
  36 compressed objects within 1 object stream
