@@ -18,8 +18,6 @@ import cv2
 import math
 import sets
 import random
-
-# Added by Capstone
 import os
 import argparse
 
@@ -177,20 +175,27 @@ class Node:
 def euclidian_dist(point_1, point_2):
     return math.sqrt((point_1[0] - point_2[0])**2 + (point_1[1] - point_2[1])**2 + (point_1[2] - point_2[2])**2)
 
-
 def main():
     # Set up command line arguments
     parser = argparse.ArgumentParser(description='Fetch Data Capture')
-
     parser.add_argument('-c', '--class',
-                        dest='class_name', action='store',
-                        help='object class name: mug, stapler, book, etc...')
-
+        dest='class_name',
+        action='store',
+        help='object class name: mug, stapler, book, etc...',
+        required=True)
     parser.add_argument('-n', '--num', '--number',
-                        dest='class_number', action='store',
-                        help='object number in data set: mug # 6, 7, 8, etc...')
+        dest='class_number',
+        action='store',
+        help='object number in data set: mug # 6, 7, 8, etc...',
+        required=True)
+
+    print len(sys.argv)
+    if(len(sys.argv)):
+        print "Need to provide command line arguments, use \"-help\" to see examples."
+        exit();
 
     args = parser.parse_args()
+
 
     # Initialize variables
     class_name = args.class_name
