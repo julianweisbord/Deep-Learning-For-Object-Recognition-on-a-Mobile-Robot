@@ -3,6 +3,7 @@ Created on January 12th, 2018
 author: Julian Weisbord
 sources: https://www.tensorflow.org/versions/r1.2/get_started/mnist/pros
          https://www.tensorflow.org/versions/r1.2/get_started/mnist/beginners
+         https://www.youtube.com/watch?v=fBVEXKp4DIc
          https://www.youtube.com/watch?v=mynJtLhhcXk
 description: Convolutional Neural Network that takes different images and
                 classifies them into 5 different categories.
@@ -26,15 +27,16 @@ IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT
 COLOR_CHANNELS = 3
 WEIGHT_SIZE = 5
 BATCH_SIZE = 50  # Number of images per step or iteration
-KEEP_RATE = 0.8
-N_EPOCHS = 800  # One iteration over all of the training data
+KEEP_RATE = 0.85
+N_EPOCHS = 10  # One iteration over all of the training data
 FC_NEURON_SIZE = 1024  # Chosen randomly for now
 N_CLASSES = len(CLASSES)
 FC_NUM_FEATURES = np.int32(IMAGE_WIDTH * IMAGE_HEIGHT * N_CLASSES * .8)
 DEFAULT_TRAIN_PATH = '../image_data/cropped'
-SAVED_MODEL_PATH = 'robot-environment-model/'
+SAVED_MODEL_PATH = 'robot-environment-model/model'
+LOGDIR = "../vis/tfviz"
 VALIDATION_SIZE = .2
-LEARNING_RATE = .0005
+LEARNING_RATE = .00102
 
 
 WEIGHTS = {
@@ -44,10 +46,14 @@ WEIGHTS = {
     'W_fc':tf.Variable(tf.random_normal([FC_NUM_FEATURES, FC_NEURON_SIZE]), name='w_fc'),
     'out':tf.Variable(tf.random_normal([FC_NEURON_SIZE, N_CLASSES]), name='w_softmax')}
 BIASES = {
-    'b_conv1':tf.Variable(tf.random_normal([32]), name='b1'),
-    'b_conv2':tf.Variable(tf.random_normal([64]), name='b2'),
-    'b_fc':tf.Variable(tf.random_normal([FC_NEURON_SIZE]), name='b_fc'),
-    'out':tf.Variable(tf.random_normal([N_CLASSES]), name='b_softmax')}
+    # 'b_conv1':tf.Variable(tf.random_normal([32]), name='b1'),
+    # 'b_conv2':tf.Variable(tf.random_normal([64]), name='b2'),
+    # 'b_fc':tf.Variable(tf.random_normal([FC_NEURON_SIZE]), name='b_fc'),
+    # 'out':tf.Variable(tf.random_normal([N_CLASSES]), name='b_softmax')
+    'b_conv1':tf.Variable(tf.constant(0.1, shape=[32]), name='b1'),
+    'b_conv2':tf.Variable(tf.constant(0.1, shape=[64]), name='b2'),
+    'b_fc':tf.Variable(tf.constant(0.1, shape=[FC_NEURON_SIZE]), name='b_fc'),
+    'out':tf.Variable(tf.constant(0.1, shape=[N_CLASSES]), name='b_softmax')}
 
 
 def grab_dataset(train_path):
@@ -57,9 +63,10 @@ def grab_dataset(train_path):
     '''
 
     image_data = PrepareData()
-    train_data, valid_data = image_data.read_train_sets(train_path, NUM_OBJECTS_PER_CLASS, CLASSES,
+    train_data, valid_data = image_data.read_train_sets(train_path,
                                                         (IMAGE_WIDTH, IMAGE_HEIGHT),
-                                                        VALIDATION_SIZE)
+                                                        VALIDATION_SIZE, CLASSES,
+                                                        NUM_OBJECTS_PER_CLASS)
     return train_data, valid_data
 
 def model_setup(x, keep_prob):
@@ -71,22 +78,27 @@ def model_setup(x, keep_prob):
     '''
 
     x = tf.reshape(x, shape=[-1, IMAGE_HEIGHT, IMAGE_WIDTH, COLOR_CHANNELS])
-    with tf.name_scope('Convolution1'):
-        conv1 = tf.nn.relu(conv2d(x, WEIGHTS['W_conv1']) + BIASES['b_conv1'])
-        conv1 = maxpool2d(conv1)
-    with tf.name_scope('Convolution2'):
-        conv2 = tf.nn.relu(conv2d(conv1, WEIGHTS['W_conv2']) + BIASES['b_conv2'])
-        conv2 = maxpool2d(conv2)
+    tf.summary.image('input', x, 3)
+    conv1 = conv2d(x, WEIGHTS['W_conv1'], BIASES['b_conv1'], "Convolution1")
+    conv2 = conv2d(conv1, WEIGHTS['W_conv2'], BIASES['b_conv2'], "Convolution2")
     conv2shape = conv2.get_shape().as_list()
     print("conv2shape: ", conv2shape)
     # All of the neurons in conv2 will connect to every neuron in fc
     flatten = tf.reshape(conv2, [-1, conv2shape[1] * conv2shape[2] * conv2shape[3]])
     print("flatten shape", flatten.get_shape())
-    with tf.name_scope('FullyConnected'):
-        fc = tf.nn.relu(tf.matmul(flatten, WEIGHTS['W_fc']) + BIASES['b_fc'])
-    output = tf.matmul(fc, WEIGHTS['out']) + BIASES['out']
-    print("output shape:", output.shape)
-    return output
+    # with tf.name_scope('FullyConnected'):
+    #     fc = tf.nn.relu(tf.matmul(flatten, WEIGHTS['W_fc']) + BIASES['b_fc'])
+    fc1 = fc_layer(flatten, WEIGHTS['W_fc'], BIASES['b_fc'], "FullyConnected")
+    # Apply Dropout
+    with tf.name_scope('Dropout'):
+        fc1 = tf.nn.dropout(fc1, keep_prob)
+    # Final fully connected layer but without RELU
+    with tf.name_scope('Prediction'):
+        # output = tf.Variable("softmax", shape=[None, 5], initializer=tf.zeros_initializer)
+        output = tf.matmul(fc1, WEIGHTS['out']) + BIASES['out']
+        print ("output", output)
+        print("output shape:", output.shape)
+        return output
 
 def loss(prediction, y):
     '''
@@ -97,12 +109,14 @@ def loss(prediction, y):
 
     '''
     with tf.name_scope('CrossEntropy'):
-        cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=prediction, labels=y))
+        y_pred = tf.nn.softmax_cross_entropy_with_logits_v2(logits=prediction, labels=y)
+        cost = tf.reduce_mean(y_pred)
+        tf.summary.scalar("CrossEntropy", cost)
     with tf.name_scope('Train'):
         optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost)
     return optimizer, cost
 
-def train(x, y, keep_prob, train_path):
+def train(x, y, keep_prob, train_path, saved_model_path=False, viz_name=False):
     '''
     Description: This function iteratively trains the model by applying training samples
                      and then updates the weights with Gradient Descent.
@@ -119,31 +133,66 @@ def train(x, y, keep_prob, train_path):
 
     # Compute the accuracy of the model
     with tf.name_scope('Accuracy'):
+        # Returns index with largest value across axes of a Tensor
         correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
         accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
-    writer = tf.summary.FileWriter("../vis/tfviz1")
+        tf.summary.scalar("Accuracy", accuracy)
+    # Write all summaries just once
+    summ = tf.summary.merge_all()
+    if viz_name:
+        writer = tf.summary.FileWriter("../vis/" + viz_name)
+    else:
+        writer = tf.summary.FileWriter(LOGDIR)
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
 
         for epoch in range(N_EPOCHS):
             epoch_x, epoch_y = train_data.next_batch(BATCH_SIZE)
-            train_accuracy = accuracy.eval({x:epoch_x, y:epoch_y})
+            train_accuracy, s = sess.run([accuracy, summ], feed_dict={x:epoch_x, y:epoch_y, keep_prob: KEEP_RATE})
+            # correct_val = sess.run([correct], feed_dict={x:epoch_x, y:epoch_y, keep_prob: KEEP_RATE})
+            if epoch % 10 == 0:
+                writer.add_summary(s, epoch)
             print('step %d, training accuracy %g' % (epoch, train_accuracy))
-            sess.run([optimizer, cost], feed_dict={x: epoch_x, y: epoch_y})
-        print('Test Accuracy:', accuracy.eval({x:valid_data.images, y:valid_data.labels, keep_prob: 1.0}))
-        save_model.save(sess, SAVED_MODEL_PATH)
+            sess.run([optimizer, cost], feed_dict={x: epoch_x, y: epoch_y, keep_prob: KEEP_RATE})
+            print('Test Accuracy:', accuracy.eval({x:valid_data.images, y:valid_data.labels, keep_prob: 1.0}))
+
+        if not saved_model_path:
+            saved_model_path = SAVED_MODEL_PATH
+        save_model.save(sess, saved_model_path)
         writer.add_graph(sess.graph)
     end_time = time.time() - start_time
     print("Total time", end_time)
 
-def conv2d(x, W):
+def conv2d(inp, W, b, name):
     '''
     Description: Convolves the input image with the weight matrix, one pixel at a time.
-    Input: x <Tensor> is the input layer Placeholder.
+    Input: input <Tensor> is the input layer Placeholder.
     Return: <Tensor Operation> A 2d Convolution.
+
     '''
-    return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
+    with tf.name_scope(name):
+        conv = tf.nn.conv2d(inp, W, strides=[1, 1, 1, 1], padding='SAME') + b
+        conv_relu = tf.nn.relu(conv)
+        tf.summary.histogram("Weights", W)
+        tf.summary.histogram("Biases", b)
+        tf.summary.histogram("RELU Activation", conv_relu)
+        conv_pooled = maxpool2d(conv_relu)
+        return conv_pooled
+
+def fc_layer(inp, W, b, name):
+    '''
+    Description: Convolves the input image with the weight matrix, one pixel at a time.
+    Input: input <Tensor> is the input layer Placeholder.
+    Return: <Tensor Operation> A 2d Convolution.
+
+    '''
+    with tf.name_scope(name):
+        fc_relu = tf.nn.relu(tf.matmul(inp, W) + BIASES['b_fc'])
+        tf.summary.histogram("Weights", W)
+        tf.summary.histogram("Biases", b)
+        tf.summary.histogram("RELU Activation", fc_relu)
+        return fc_relu
 
 def maxpool2d(x):
     '''
@@ -160,10 +209,11 @@ def main():
         train_path = DEFAULT_TRAIN_PATH
     else:
         train_path = sys.argv[1]
-
+    # None here allows us to pass batches of any number of images
     x = tf.placeholder(tf.float32, shape=[None, IMAGE_WIDTH, IMAGE_HEIGHT, COLOR_CHANNELS], name = "x")
     keep_prob = tf.placeholder(tf.float32)
     y = tf.placeholder(tf.float32, shape=[None, N_CLASSES], name="y")
+    print("y: ", y)
 
     train(x, y, keep_prob, train_path)
 

@@ -1,6 +1,17 @@
 # CS 461 Group 67 Repository by Julian Weisbord, Miles McCall, and Michael Rodriguez.
 
 For our senior design capstone project, we will build an image classifier on top of an autonomous robot. By leveraging ROS (Robot Operating System) and the existing mobile robot platform, we will provide a Convolutional Neural Network (CNN) model that utilizes online learning so that the robot can continuously learn to recognize objects in its environment.
+## Results
+Classification Results using Inception ResNet (in_resnet.py):
+
+![/home/julianweisbord/senior_design/Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot-in_resnet_results](https://raw.githubusercontent.com/julianweisbord/Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot/elastic_weight_consolidation/docs/readme_imgs/in_resnet_results.png
+
+To run the Inception ResNet Model on a novel set of images, run classify.py.
+Here is an example run:
+
+![/home/julianweisbord/senior_design/Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot-classifications](https://raw.githubusercontent.com/julianweisbord/Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot/elastic_weight_consolidation/docs/readme_imgs/classifications.png
+
+
 
 ## Installation
 ### 1. git clone [this repo]

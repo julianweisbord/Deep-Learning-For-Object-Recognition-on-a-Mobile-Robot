@@ -15,7 +15,7 @@ import tensorflow as tf
 
 # Local Imports
 import model as mdl
-from image_capture.novel_image import PrepareNovelData
+from image_capture.prepare_data import PrepareData
 
 
 SAVED_MODEL_PATH = 'robot-environment-model/.data-00000-of-00001'
@@ -31,6 +31,7 @@ VALIDATION_SIZE = .2
 LAMBDA_OPTIONS = [0, 1, 2, 5, 15]
 LEARNING_RATE = .001
 ITERATIONS = 200
+COMPARE_TO_SGD = True
 
 def grab_dataset(self, train_path):
     '''
@@ -38,16 +39,16 @@ def grab_dataset(self, train_path):
     Return: <Tuple of Datasets> The training and validation datasets.
     '''
 
-    image_data = PrepareNovelData()
+    image_data = PrepareData()
     # PrepareNovelData should have a check to see how many objects are actually in train_path
         # and only use those since the number may be different than the constant "CLASSES"
         # Also notice NUM_OBJECTS_PER_CLASS is not in read_data_sets_facade, this may be
         # different each type so it should not be a constant. We will have to determine
         # this value from the directory structure.
-    train_data, valid_data = image_data.read_data_sets_facade(train_path, CLASSES,
-                                                              (IMAGE_WIDTH, IMAGE_HEIGHT),
-                                                              VALIDATION_SIZE)
-    return train_data, valid_data
+    train_data, val_data = image_data.read_data(train_path,
+                                                (IMAGE_WIDTH, IMAGE_HEIGHT),
+                                                VALIDATION_SIZE)
+    return train_data, val_data
 
 
 class EWCModel:
@@ -85,27 +86,67 @@ class EWCModel:
         if self.model_type == "model":
             prediction = mdl.model_setup(self.x, self.keep_prob)
             with tf.name_scope('SequentialLearningCrossEntropy'):
-                cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=prediction, labels=self.y))
-            self.ewc_loss = cost
+                self.cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=prediction, labels=self.y))
+            self.vanilla_sgd()
+            self.ewc_loss = self.cross_entropy
 
         elif self.model_type == "in_resnet":
             pass
+        return prediction
 
     def update_opt_weights(self):
         pass
 
-    def compute_fisher(self):
+    def reassign_opt_weights(self):
+        # Replace original task's weights with sequential learning weights
         pass
+
+    def vanilla_sgd(self):
+        with tf.name_scope('StochasticGradientDescent'):
+            self.train_step = tf.train.GradientDescentOptimizer(LEARNING_RATE).minimize(self.cross_entropy)
+
+
+    def compute_fisher(self, prediction, imgset, num_samples=200, plot=False):
+        self.F_accum = []
+        for v in range(len(self.var_list)):
+            self.F_accum.append(np.zeros(self.var_list[v].get_shape().as_list()))
+        print("F.accum: ", self.F_accum)
+
+        class_ind = tf.to_int32(tf.multinomial(tf.log(prediction), 1)[0][0])
+
+        for img_num in range(num_samples):
+            # rand_image = np.random.randint(imgset.shape[0])
+            # For each image, calculate derivatives of sum of log(prediction) of each image
+                # w.r.t the weights of the new task
+            ders = sess.run(tf.gradients(tf.log(prediction[0,class_ind]), self.var_list),
+                            feed_dict={self.x: imgset[img_num]})
+            # Square ders and add them to total
+            for v in range(len(self.F_accum)):
+                self.F_accum[v] += np.square(ders[v])
+
+        for v in range(len(self.F_accum)):
+            self.F_accum[v] /= num_samples
 
     def update_ewc_loss(self, lam):
         for i in range(len(self.var_list)):
             self.ewc_loss += lam/2 * tf.reduce_sum(tf.multiply(self.F_accum[i].astype(np.float32),
-                                                           tf.square(self.var_list[i] - self.optimal_vars[i])))
+                                                               tf.square(self.var_list[i] - self.optimal_vars[i])))
             # Probably should switch to adam optimizer
-            self.train_step = tf.train_step = tf.train.GradientDescentOptimizer(LEARNING_RATE).minimize(self.ewc_loss)
+            self.train_step = tf.train.GradientDescentOptimizer(LEARNING_RATE).minimize(self.ewc_loss)
+
+    def train(self, online, display_freq, train_data, val_data):
+        pass
 
     def save_optimal_vars(self):
         pass
+
+    def plot_test_acc(self, plot_handles):
+        plt.legend(handles=plot_handles, loc="center right")
+        plt.xlabel("Iterations")
+        plt.ylabel("Test Accuracy")
+        plt.ylim(0, 1)
+        display.display(plt.gcf())
+        display.clear_output(wait=True)
 
 
 def main():
@@ -130,12 +171,16 @@ def main():
             tf.Saver.restore(sess, SAVED_MODEL_PATH)
         except:
             print("You need to have already run model.py without sequential learning")
-        online = EWCModel(new_train_path, sess, model_type)
-        online.new_task_model()
-        online.update_loss()
-        online.update_ewc_loss(LAMBDA_OPTIONS[4])
 
-        train_data, valid_data = grab_dataset(new_train_path)
+        train_data, val_data = grab_dataset(new_train_path)
+        online = EWCModel(new_train_path, sess, model_type)
+
+        prediction = online.new_task_model()
+        online.compute_fisher(prediction, val_data, num_samples=train_data.get_shape()[0])
+        online.train(online, display_freq, train_data, val_data)
+        # online.update_ewc_loss(LAMBDA_OPTIONS[4])
+
+
 
         for iteration in range(NUM_ITERATIONS):
             epoch_x, epoch_y = train_data.next_batch(BATCH_SIZE)
