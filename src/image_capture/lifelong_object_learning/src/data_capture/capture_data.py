@@ -27,7 +27,6 @@ import random
 import os
 import argparse
 
-
 class Node:
     def __init__(self, image_topic, camera_info_topic,
                  camera_frame, published_point_num_topic, published_point_base_topic,
