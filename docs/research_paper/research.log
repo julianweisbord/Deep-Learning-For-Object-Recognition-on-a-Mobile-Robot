@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.5.23)  9 MAY 2018 23:52
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.5.23)  11 MAY 2018 13:30
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -302,20 +302,20 @@ Package: float 2001/11/08 v1.3d Float enhancements (AL)
 ) (./research.aux)
 \openout1 = `research.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 7.
-LaTeX Font Info:    ... okay on input line 7.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 7.
-LaTeX Font Info:    ... okay on input line 7.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 7.
-LaTeX Font Info:    ... okay on input line 7.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 7.
-LaTeX Font Info:    ... okay on input line 7.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 7.
-LaTeX Font Info:    ... okay on input line 7.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 7.
-LaTeX Font Info:    ... okay on input line 7.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 7.
-LaTeX Font Info:    ... okay on input line 7.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 8.
+LaTeX Font Info:    ... okay on input line 8.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 8.
+LaTeX Font Info:    ... okay on input line 8.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 8.
+LaTeX Font Info:    ... okay on input line 8.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 8.
+LaTeX Font Info:    ... okay on input line 8.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 8.
+LaTeX Font Info:    ... okay on input line 8.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 8.
+LaTeX Font Info:    ... okay on input line 8.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 8.
+LaTeX Font Info:    ... okay on input line 8.
 -- Lines per column: 58 (exact).
 (/usr/local/texlive/2017/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
@@ -352,7 +352,7 @@ Package caption Info: float package is loaded.
 Package caption Info: hyperref package is loaded.
 Package caption Info: End \AtBeginDocument code.
 \AtBeginShipoutBox=\box31
-Package hyperref Info: Link coloring OFF on input line 7.
+Package hyperref Info: Link coloring OFF on input line 8.
 
 (/usr/local/texlive/2017/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2016/05/21 v2.44 Cross-referencing by name of section
@@ -362,9 +362,9 @@ Package: gettitlestring 2016/05/16 v1.5 Cleanup title references (HO)
 )
 \c@section@level=\count113
 )
-LaTeX Info: Redefining \ref on input line 7.
-LaTeX Info: Redefining \pageref on input line 7.
-LaTeX Info: Redefining \nameref on input line 7.
+LaTeX Info: Redefining \ref on input line 8.
+LaTeX Info: Redefining \pageref on input line 8.
+LaTeX Info: Redefining \nameref on input line 8.
 
 (./research.out) (./research.out)
 \@outlinefile=\write3
@@ -372,9 +372,9 @@ LaTeX Info: Redefining \nameref on input line 7.
 
  (./research.toc
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 3.
+(Font)              <7> on input line 4.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 3.
+(Font)              <5> on input line 4.
 )
 \tf@toc=\write4
 \openout4 = `research.toc'.
@@ -384,49 +384,52 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 \openout5 = `research.lof'.
 
 
-<pictures/results.png, id=51, 1284.8pt x 659.46375pt>
+<pictures/results.png, id=76, 1284.8pt x 659.46375pt>
 File: pictures/results.png Graphic file (type png)
 
 <use pictures/results.png>
-Package pdftex.def Info: pictures/results.png used on input line 45.
+Package pdftex.def Info: pictures/results.png used on input line 52.
 (pdftex.def)             Requested size: 252.0pt x 129.34457pt.
 
-<pictures/model.png, id=53, 3011.25pt x 1238.6275pt>
+<pictures/model.png, id=78, 3011.25pt x 1238.6275pt>
 File: pictures/model.png Graphic file (type png)
  <use pictures/model.png>
-Package pdftex.def Info: pictures/model.png used on input line 52.
+Package pdftex.def Info: pictures/model.png used on input line 58.
 (pdftex.def)             Requested size: 252.0pt x 103.6471pt.
 
 [1{/usr/local/texlive/2017/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
 
 
- <./pictures/results.png> <./pictures/model.png>]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 63.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 63.
+ <./pictures/results.png>]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 71.
+ [2
+
+ <./pictures/model.png>]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 71.
  (./research.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 63.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 63.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 71.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 71.
 Package rerunfilecheck Info: File `research.out' has not changed.
-(rerunfilecheck)             Checksum: 2F515A4EDF762A8B1D163FE4C52A613D;500.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 63.
+(rerunfilecheck)             Checksum: 82600BE68D43AEFF7C9285CCB5415411;830.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 71.
  ) 
 Here is how much of TeX's memory you used:
- 6998 strings out of 492995
- 112400 string characters out of 6132704
- 205049 words of memory out of 5000000
- 10498 multiletter control sequences out of 15000+600000
+ 7009 strings out of 492995
+ 112556 string characters out of 6132704
+ 206049 words of memory out of 5000000
+ 10503 multiletter control sequences out of 15000+600000
  35192 words of font info for 64 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 36i,5n,39p,457b,309s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 36i,5n,39p,527b,313s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2017/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
 exlive/2017/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/201
 7/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/local/texlive/2017/texmf-d
 ist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2017/texmf-dist/fonts/
 type1/urw/times/utmri8a.pfb>
-Output written on research.pdf (1 page, 589969 bytes).
+Output written on research.pdf (2 pages, 596506 bytes).
 PDF statistics:
- 91 PDF objects out of 1000 (max. 8388607)
- 79 compressed objects within 1 object stream
- 16 named destinations out of 1000 (max. 500000)
- 83 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 122 PDF objects out of 1000 (max. 8388607)
+ 108 compressed objects within 2 object streams
+ 22 named destinations out of 1000 (max. 500000)
+ 123 words of extra memory for PDF output out of 10000 (max. 10000000)
 
