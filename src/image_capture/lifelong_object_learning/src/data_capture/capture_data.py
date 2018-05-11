@@ -1,4 +1,10 @@
-#!/usr/bin/env python
+'''
+Created on February 9th, 2018
+author: Michael Rodriguez
+sources: http://docs.fetchrobotics.com/
+description: Module to collect image data with fetch robot.
+'''
+
 import rospy
 from tf import TransformListener, transformations
 from std_msgs.msg import String, Int32
@@ -20,6 +26,7 @@ import sets
 import random
 import os
 import argparse
+
 
 class Node:
     def __init__(self, image_topic, camera_info_topic,
@@ -175,27 +182,37 @@ class Node:
 def euclidian_dist(point_1, point_2):
     return math.sqrt((point_1[0] - point_2[0])**2 + (point_1[1] - point_2[1])**2 + (point_1[2] - point_2[2])**2)
 
+
 def main():
+    '''
+        Main - Image capturing method
+        This function captures data on a given object class and instance by having
+        the robot randomly pick a goal and then make a route to that goal to take a
+        a picture of the object.
+        # Arguments
+            class_name: The class name of which object will be getting captured.
+            Used to determine directory to save images to.
+            class_number: The instance number of the object class. Used to
+            determine directory to save images to.
+        # Returns
+            Output: None
+    '''
     # Set up command line arguments
     parser = argparse.ArgumentParser(description='Fetch Data Capture')
-    parser.add_argument('-c', '--class',
-        dest='class_name',
-        action='store',
-        help='object class name: mug, stapler, book, etc...',
-        required=True)
-    parser.add_argument('-n', '--num', '--number',
-        dest='class_number',
-        action='store',
-        help='object number in data set: mug # 6, 7, 8, etc...',
-        required=True)
 
-    print len(sys.argv)
-    if(len(sys.argv)):
-        print "Need to provide command line arguments, use \"-help\" to see examples."
-        exit();
+    parser.add_argument('-c', '--class',
+                        dest='class_name', action='store',
+                        help='object class name: mug, stapler, book, etc...')
+
+    parser.add_argument('-n', '--num', '--number',
+                        dest='class_number', action='store',
+                        help='object number in data set: mug # 6, 7, 8, etc..')
 
     args = parser.parse_args()
 
+    if(len(sys.argv)):
+        print "Need to provide command line arguments, use \"-help\" to see examples."
+        exit();
 
     # Initialize variables
     class_name = args.class_name
@@ -206,9 +223,6 @@ def main():
     num_published_points = 4
     sample_min_radius = .6
     sample_max_radius = 1
-    sample_height = .5
-    height_offset = 1.0
-    num_positions_to_sample = 80
     max_spine_height = .386
     min_spine_height = 0.00313
     spine_offset = 0.0
@@ -241,7 +255,6 @@ def main():
     camera_info_topic = "/head_camera/rgb/camera_info"
     map_frame = "/map"
     camera_frame = "/head_camera_rgb_optical_frame"
-    ar_tag_frame = "/april_tag_0"
     published_point_num_topic = "/object_point_num"
     published_point_base_topic = "/object_point"
     torso_movement_topic = "/torso_controller/follow_joint_trajectory"
@@ -342,23 +355,20 @@ def main():
                             # find pixel coordinates of points of interest
                             # tl, tr, bl, br
                             ref_points = node.published_points
-
                             height, width, channels = img_cur.shape
 
-                            ref_points_camera_frame = []
                             points_to_write = []
                             for ref_point in ref_points:
                                 ps = PointStamped()
                                 ps.header.frame_id = map_frame
                                 ps.header.stamp = node.tf.getLatestCommonTime(
                                     camera_frame, ps.header.frame_id)
-                                # ps.header.stamp = rospy.Time.now()
+
                                 ps.point.x = ref_point[0]
                                 ps.point.y = ref_point[1]
                                 ps.point.z = ref_point[2]
 
                                 ps_new = node.tf.transformPoint(camera_frame, ps)
-                                # ref_points_camera_frame.append([ps_new.point.x, ps_new.point.y, ps_new.point.z])
 
                                 (u, v) = camera_model.project3dToPixel(
                                     (ps_new.point.x, ps_new.point.y, ps_new.point.z))
@@ -381,7 +391,7 @@ def main():
 
                             f.write(str(goal_x) + "\n")
                             f.write(str(goal_y) + "\n")
-                            f.write(str(position[3]) + "\n")        # spine height
+                            f.write(str(position[3]) + "\n")     # spine height
                             f.close()
 
                             circle_img = img_cur.copy()
@@ -420,6 +430,7 @@ def main():
             node.move_base_to(goal_x, goal_y, goal_theta)
 
         rate.sleep()
+
 
 if __name__ == "__main__":
     main()
