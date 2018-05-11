@@ -73,6 +73,7 @@ def main():
 
     # Full path to image class folder
     image_class_path = home_dir + "data_captured/" + object_class
+    image_crop_path = home_dir + "data_captured/cropped/" + object_class
 
     # This is the desired image dimensions (ex:220x220)
     desired_dims = 200  # Default Value for dimensions if not provided
@@ -90,7 +91,7 @@ def main():
 
         text_file_path = image_class_path + "/" + object_class + "_" + object_instance + "/metadata/"
         image_file_path = image_class_path + "/" + object_class + "_" + object_instance + "/images/"
-        save_image_path = image_class_path + "/" + "cropped/" + object_class + "_" + object_instance + "/images/"
+        save_image_path = image_crop_path + "/" + object_class + "_" + object_instance + "/images/"
         index = 0
 
         # Path dir creation
@@ -111,13 +112,18 @@ def main():
 
             file_base = splitext(file)[0]
             image_file_name = file_base + ".png"
-            print("Index: ", index)  # Printing index of current image
+            print "Object Number: ", object_instance, " Index: ", index  # Printing index of current image
             lines = [line.rstrip('\n') for line in open(text_file_path + file)]
 
             image_file = image_file_path + image_file_name
-            image_size = lines[1].split()
-            height = int(image_size[0])
-            width = int(image_size[1])
+
+            try:
+                image_size = lines[1].split()
+                height = int(image_size[0])
+                width = int(image_size[1])
+            except IndexError:
+                image_size = 'null'
+                continue
 
             image_filename = save_image_path + file_base + ".png"
             x1 = ((width/2) - (desired_dims/2))
