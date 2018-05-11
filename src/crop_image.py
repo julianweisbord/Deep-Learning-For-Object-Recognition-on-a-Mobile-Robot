@@ -123,6 +123,7 @@ def main():
                 width = int(image_size[1])
             except IndexError:
                 image_size = 'null'
+                index += 1
                 continue
 
             image_filename = save_image_path + file_base + ".png"
