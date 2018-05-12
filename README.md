@@ -4,12 +4,12 @@ For our senior design capstone project, we will build an image classifier on top
 ## Results
 Classification Results using Inception ResNet (in_resnet.py):
 
-![Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot-in_resnet_results](https://raw.githubusercontent.com/julianweisbord/Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot/elastic_weight_consolidation/docs/readme_imgs/in_resnet_results.png)
+![Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot-in_resnet_results](https://raw.githubusercontent.com/julianweisbord/Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot/master/docs/readme_imgs/in_resnet_results.png)
 
 To run the Inception ResNet Model on a novel set of images, run classify.py.
 Here is an example:
 
-![Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot-classifications](https://raw.githubusercontent.com/julianweisbord/Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot/elastic_weight_consolidation/docs/readme_imgs/classifications.png)
+![Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot-classifications](https://raw.githubusercontent.com/julianweisbord/Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot/master/docs/readme_imgs/classifications.png)
 
 
 
