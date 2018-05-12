@@ -32,48 +32,39 @@ def grab_dataset(dataset_path, classes=None, num_objects=0):
     # Description: This function grabs the collected image data from novel_image_prep.py
     # Return: <Tuple of Datasets> The training and validation datasets.
     # '''
-    # pred_data = PrepareData()
-    # dataset = pred_data.read_train_sets(dataset_path,
-    #                                     (IMAGE_WIDTH, IMAGE_HEIGHT),
-    #                                     validation_size=0, classes=None, num_objects=None)
-    # Check which object folders are actually in the train_path
-    # print("os.listdir: ", os.listdir(DEFAULT_DATA_PATH))
     labels = []
     file_paths = []
+
     if not classes:
         classes = []
         for cls in os.listdir(DEFAULT_DATA_PATH):
-
             classes.append(cls)
 
     for field in classes:
-        print("classes: ", classes)
         # Determine number of objects that were captured per object class
+        print("classes: ", classes)
         if not num_objects:
             num_objects = 0
             for _ in os.listdir(DEFAULT_DATA_PATH + '/' + field):
                 num_objects += 1
+
         print("num objects", num_objects)
         index = classes.index(field)
-
         print('Now going to read {} files (Index: {})'.format(field, index))
+
         for i in range(1, num_objects + 1):
             img = field + '_' + str(i) + '/images/'
             path = os.path.join(DEFAULT_DATA_PATH, field, img)
-            print("path", path)
             files = glob.glob(path + '*')
+            print("path", path)
             for img in files:
                 label = np.zeros(N_CLASSES)
                 label[index] = 1.0
                 labels.append(label)
             file_paths.append(files)
-    # print("labels: ", labels)
-
     return file_paths, labels
 
 def classify(file_paths, labels):
-
-    # print("file_paths", file_paths)
     # load YAML and restore model
     yaml_file = open(SAVED_MODEL_PATH, 'r')
     loaded_model_yaml = yaml_file.read()
@@ -83,11 +74,7 @@ def classify(file_paths, labels):
     predictions = []
     count = 0
     for field_arr in file_paths:
-        # print("field_arr", field_arr)
         for img_path in field_arr:
-            # print("img_path", img_path)
-            # print("count", count)
-
             img = image.load_img(img_path, target_size=(IMAGE_WIDTH, IMAGE_HEIGHT))
             img = image.img_to_array(img)
             x = np.expand_dims(img, axis=0)
@@ -98,13 +85,11 @@ def classify(file_paths, labels):
             print("count: ", count)
             print("label for this val: ", labels[count])
             count += 1
-
     return predictions, labels
 
 def main():
     if len(sys.argv) == 2:
         prediction_data = sys.argv[1]
-
     else:
         print("Using default dataset path instead of command line args")
         prediction_data = DEFAULT_DATA_PATH
