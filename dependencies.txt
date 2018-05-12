@@ -6,3 +6,4 @@ scipy==1.0.0
 keras==2.1.5
 h5py==2.7.1
 pillow==5.0.0
+sklearn==0.0

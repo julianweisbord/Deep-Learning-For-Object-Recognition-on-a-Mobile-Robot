@@ -12,7 +12,7 @@ import numpy as np
 from sklearn.utils import shuffle
 import cv2
 
-# Caching Plan:
+# TODO: Caching Plan:
 # if data is already in a file (first line of label_file is [last_data_change_time, last time file was written to])
     # if last data change made > last time label_file was written to
     #     go through all of the image data and write to label_file with new data changes
@@ -34,7 +34,7 @@ class PrepareData():
         self.train = None
         self.valid = None
 
-    def read_train_sets(self, train_path, num_objects, classes, image_size, validation_size):
+    def read_train_sets(self, train_path, image_size, validation_size=.2, classes=None, num_objects=None):
         '''
         Description: Helper function to load image data and create validation and training datasets.
         Input: train_path <string> the path to overacrching folder containing all image files,
@@ -45,7 +45,7 @@ class PrepareData():
         Return: data_sets <tuple of Dataset() objects> are the training and validation datasets
         '''
 
-        images, labels, img_names, class_name = self.load_train(train_path, num_objects, classes, image_size)
+        images, labels, img_names, class_name = self.load_train(train_path, image_size, classes, num_objects)
         images, labels, img_names, class_name = shuffle(images, labels, img_names, class_name)  # Randomize arrays
 
         if isinstance(validation_size, float):
@@ -60,12 +60,16 @@ class PrepareData():
         train_img_names = img_names[validation_size:]
         train_class_name = class_name[validation_size:]
 
-        self.train = Dataset(train_images, train_labels, train_img_names, train_class_name)
-        self.valid = Dataset(validation_images, validation_labels, validation_img_names, validation_class_name)
-        data_sets = (self.train, self.valid)
+        if validation_size == 0:
+            data_sets = Dataset(train_images, train_labels, train_img_names, train_class_name)
+        else:
+
+            self.train = Dataset(train_images, train_labels, train_img_names, train_class_name)
+            self.valid = Dataset(validation_images, validation_labels, validation_img_names, validation_class_name)
+            data_sets = (self.train, self.valid)
         return data_sets
 
-    def load_train(self, train_path, num_objects, classes, image_size):
+    def load_train(self, train_path, image_size, classes=None, num_objects=None):
         '''
         Description: Reads files from different class folders, resizes them, and saves the pixels and labels
         Input: train_path <string> the path to overacrching folder containing all image files,
@@ -73,13 +77,27 @@ class PrepareData():
                image_size <tuple of ints> is the desired width and height of the input image,
         Return: images, labels, img_names, class_name <tuple of lists> ouput pixels and labeling data
         '''
+
         images = []
         labels = []  # One-hot encoding array
         img_names = []  # img file base path, the png file
         class_name = []  # Classes english name
 
+        # Check which object folders are actually in the train_path
+        if not classes:
+            classes = []
+            for cls in os.listdir(train_path):
+                classes.append(cls)
+
         for field in classes:
+            # Determine number of objects that were captured per object class
+            if not num_objects:
+                num_objects = 0
+                for _ in os.listdir(train_path + '/' + field):
+                    num_objects += 1
+            print("num objects", num_objects)
             index = classes.index(field)
+            
             print('Now going to read {} files (Index: {})'.format(field, index))
             for i in range(1, num_objects + 1):
                 img = field + '_' + str(i) + '/images/'
@@ -103,7 +121,8 @@ class PrepareData():
         labels = np.array(labels)
         img_names = np.array(img_names)
         class_name = np.array(class_name)
-        print("class_name: {} labels: {}".format(class_name[0], labels[0]))
+        if len(class_name) and len(labels):
+            print("class_name: {} labels: {}".format(class_name[0], labels[0]))
 
         return images, labels, img_names, class_name
 
