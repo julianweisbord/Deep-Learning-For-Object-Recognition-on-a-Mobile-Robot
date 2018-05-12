@@ -28,16 +28,16 @@ from keras.layers import Input
 from keras.layers import Lambda
 from keras.layers import MaxPooling2D
 from keras.models import Model
+from keras.models import model_from_yaml
 from keras.utils.data_utils import get_file
 from keras.engine.topology import get_source_inputs
 from keras.applications.imagenet_utils import _obtain_input_shape
 from keras.applications.imagenet_utils import decode_predictions
-from keras.preprocessing.image import ImageDataGenerator
+from keras.preprocessing import image
 from keras.callbacks import EarlyStopping, History
+from keras.applications.resnet50 import preprocess_input
 
-# Local Imports
-import model
-
+import model as mdl
 
 BASE_WEIGHT_URL = 'https://github.com/fchollet/deep-learning-models/releases/download/v0.7/'
 CLASSES = ['book', 'chair', 'mug', 'screwdriver', 'stapler']
@@ -47,7 +47,7 @@ N_CLASSES = len(CLASSES)
 IMAGE_HEIGHT = 139
 IMAGE_WIDTH = 139
 BATCH_SIZE = 10
-N_EPOCHS = 10
+N_EPOCHS = 11
 N_SAMPLES = 1757
 INCLUDE_TOP = True
 
@@ -389,12 +389,12 @@ def setup_image_dir(train_path, val_path):
     if not files:
         # Check if there is an image directory that model.py uses
             # then copy those images
-        if os.path.exists(model.DEFAULT_TRAIN_PATH):
-            print("model's train path exists")
+        if os.path.exists(mdl.DEFAULT_TRAIN_PATH):
+            print("mdl's train path exists")
             for field in CLASSES:
                 for i in range(1, N_CLASSES + 1):
                     img = field + '_' + str(i) + '/images/'
-                    path = os.path.join(model.DEFAULT_TRAIN_PATH, field, img)
+                    path = os.path.join(mdl.DEFAULT_TRAIN_PATH, field, img)
                     print("path", path)
                     files = glob.glob(path + '*')
                     train_dest = train_path + "/" + field + "/"
@@ -446,7 +446,7 @@ def main():
 
     # prepare data augmentation configuration
     print("Passing images through model")
-    train_datagen = ImageDataGenerator(
+    train_datagen = image.ImageDataGenerator(
         # rescale=1./255,
         rotation_range=20,
         width_shift_range=0.2,
@@ -454,7 +454,7 @@ def main():
         shear_range=0.2,
         zoom_range=0.2,
         horizontal_flip=True)
-    test_datagen = ImageDataGenerator() #rescale=1./255)
+    test_datagen = image.ImageDataGenerator() #rescale=1./255)
 
     train_generator = train_datagen.flow_from_directory(
         DEFAULT_TRAIN_PATH,
@@ -484,19 +484,12 @@ def main():
         validation_steps=N_SAMPLES // BATCH_SIZE)
     end_time = time.time() - start_time
     print("Total time", end_time)
+    # Save the model to a yaml file
+    print("Saving model to yaml")
+    model_yaml = model.to_yaml()
+    with open("robot-environment-model/in_resnet.yaml", "w") as yaml_file:
+        yaml_file.write(model_yaml)
 
-# Prediction
-# img_path = 'elephant.jpg'
-# img = image.load_img(img_path, target_size=(299, 299))
-# x = image.img_to_array(img)
-# x = np.expand_dims(x, axis=0)
-# x = preprocess_input(x)
-#
-# preds = model.predict(x)
-# # decode the results into a list of tuples (class, description, probability)
-# # (one such list for each sample in the batch)
-# print('Predicted:', decode_predictions(preds, top=3)[0])
-# # Predicted: [(u'n02504013', u'Indian_elephant', 0.82658225), (u'n01871265', u'tusker', 0.1122357), (u'n02504458', u'African_elephant', 0.061040461)]
 
 if __name__ == '__main__':
     main()
