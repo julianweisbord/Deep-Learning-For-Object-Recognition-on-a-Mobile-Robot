@@ -4,3 +4,5 @@
 4. Use Tensorflow's Keras instead of just Keras
 5. Tensorboard to in_resnet.py
 6. Add dropout
+7. If the novel images passed to classify.py are above a certain percentage accuracy, add
+      them to the main dataset.
