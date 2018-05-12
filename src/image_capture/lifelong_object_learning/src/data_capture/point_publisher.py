@@ -1,6 +1,12 @@
-#!/usr/bin/env python
+'''
+Created on February 9th, 2018
+author: Michael Rodriguez
+sources: http://docs.fetchrobotics.com/
+description: Module to monitor keyboard activity for ROS
+'''
+# External Imports
 import rospy
-# from tf import TransformListener
+# Local Imports
 from std_msgs.msg import Int32
 from geometry_msgs.msg import PointStamped
 from visualization_msgs.msg import Marker
@@ -10,6 +16,17 @@ import tf
 
 class PointPublisher:
     def __init__(self, ar_tag_frame, point_topic):
+        '''
+            __init__ establishes the variabes included in the class
+    	    # Arguments
+    			self: class definition
+                ar_tag_frame: data structure used for AR tags
+                point_topic: ROS topic describing a point
+    	    # Returns
+    			Sets all default values of class variables
+    	    # Raises
+    			None
+    	'''
         rospy.Subscriber(point_topic, PointStamped, self.point_callback)
         self.tf = tf.TransformListener()
         self.ar_tag_frame = ar_tag_frame
@@ -19,15 +36,17 @@ class PointPublisher:
         self.pubs = []
         self.marker_pubs = []
 
-
     def point_callback(self, data):
-        # if data.header.seq != self.last_seq:
-        #     self.last_seq  = data.header.seq
-
-        # find point coords in ar tag frame
-        # t = self.tf.getLatestCommonTime(data.header.frame_id, self.map_frame)
-        # data.header.stamp = t
-        # point = self.tf.transformPoint(self.map_frame, data)
+        '''
+            point_callback takes point data and
+                calls ROS functions to publish the point
+    	    # Arguments
+    			self: class definition
+    	    # Returns
+                Publishes a ROS point
+    	    # Raises
+    			None
+    	'''
         point = data
         self.points.append(point)
         point_pub = rospy.Publisher('/object_point' + str(data.header.seq), PointStamped, queue_size=10)
@@ -35,15 +54,20 @@ class PointPublisher:
         self.pubs.append(point_pub)
         self.marker_pubs.append(marker_pub)
         self.num_points += 1
-
         print "Point " + str(data.header.seq) +" clicked"
 
-
 def main():
-
-    # ar_tag_frame = rospy.get_param('ar_tag_frame')
-    # point_topic = rospy.get_param('point_topic')
-
+    '''
+		main establishes a ROS connection and opens a point publisher.
+            It loops continuously, publishing updated ROS points, creating
+            associated markers, and keeping track of odometry and orientation.
+	    # Arguments
+			None
+	    # Returns
+            None
+	    # Raises
+			None
+	'''
     ar_tag_frame = '/tag_0'
     point_topic = '/clicked_point'
 
@@ -87,7 +111,6 @@ def main():
 
             marker_pub = point_publisher.marker_pubs[i]
             marker_pub.publish(marker)
-
         rate.sleep()
 
 if __name__ == "__main__":
