@@ -11,6 +11,7 @@ description: This is the inference layer, it runs a novel image set through
 import os
 import sys
 import glob
+import argparse
 import numpy as np
 from keras.models import model_from_yaml
 from keras.preprocessing import image
@@ -19,12 +20,14 @@ from keras.applications.resnet50 import preprocess_input
 from image_capture.prepare_data import PrepareData
 
 # Definitions and Constants
+IMG_DATA_PATH = '/Users/mccallm/Downloads/image_data/'
+DEFAULT_TRAIN_PATH = IMG_DATA_PATH + '/train'
+DEFAULT_DATA_PATH = IMG_DATA_PATH + 'cropped_inference/'
+DEFAULT_VAL_PATH = IMG_DATA_PATH + '/validation'
 IMAGE_HEIGHT = 139
 IMAGE_WIDTH = 139
 COLOR_CHANNELS = 3
-IMG_DATA_PATH = '/Users/mccallm/Downloads/image_data/'
 SAVED_MODEL_PATH = 'robot-environment-model/in_resnet.yaml'
-DEFAULT_DATA_PATH = IMG_DATA_PATH + 'cropped_inference/'
 CLASSES = ['book', 'chair', 'mug', 'screwdriver', 'stapler']
 N_CLASSES = len(CLASSES)
 
@@ -89,12 +92,13 @@ def classify(file_paths, labels):
     return predictions, labels
 
 def main():
-    if len(sys.argv) == 2:
-        prediction_data = sys.argv[1]
-    else:
-        print("Using default dataset path instead of command line args")
-        prediction_data = DEFAULT_DATA_PATH
+    parser = argparse.ArgumentParser(description='Image Cropping')
+    parser.add_argument('-i', '--img',
+                        dest='IMG_DATA_PATH', action='store',
+                        help='image data path')
+    args = parser.parse_args()
 
+    prediction_data = args.IMG_DATA_PATH + 'cropped_inference/'
     file_paths, labels = grab_dataset(prediction_data)
     predictions, correct_values = classify(file_paths, labels)
     # print("Prediction: ", prediction)

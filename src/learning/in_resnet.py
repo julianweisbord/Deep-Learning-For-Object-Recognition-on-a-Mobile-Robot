@@ -14,6 +14,7 @@ import time
 import glob
 import warnings
 import shutil
+import argparse
 import numpy as np
 from keras import backend as K
 from keras.layers import Activation
@@ -38,12 +39,9 @@ from keras.callbacks import EarlyStopping, History
 from keras.applications.resnet50 import preprocess_input
 
 import model as mdl
-
 IMG_DATA_PATH = '/Users/mccallm/Downloads/image_data/'
 BASE_WEIGHT_URL = 'https://github.com/fchollet/deep-learning-models/releases/download/v0.7/'
 CLASSES = ['book', 'chair', 'mug', 'screwdriver', 'stapler']
-DEFAULT_TRAIN_PATH = IMG_DATA_PATH + '/train'
-DEFAULT_VAL_PATH = IMG_DATA_PATH + '/validation'
 N_CLASSES = len(CLASSES)
 IMAGE_HEIGHT = 139
 IMAGE_WIDTH = 139
@@ -51,7 +49,7 @@ BATCH_SIZE = 10
 N_EPOCHS = 11
 N_SAMPLES = 1757
 INCLUDE_TOP = True
-
+MIN_NUM_ARGS = 3
 
 def conv2d_bn(x,
               filters,
@@ -411,6 +409,20 @@ def setup_image_dir(train_path, val_path):
                         shutil.copy(fl, val_dest)
 
 def main():
+ # Setting up command line arguments
+    parser = argparse.ArgumentParser(description='Image Cropping')
+    parser.add_argument('-i', '--img',
+                        dest='IMG_DATA_PATH', action='store',
+                        help='image data path')
+
+    args = parser.parse_args()
+    DEFAULT_TRAIN_PATH = args.IMG_DATA_PATH + '/train'
+    DEFAULT_VAL_PATH = args.IMG_DATA_PATH + '/validation'
+
+    if (len(sys.argv) < MIN_NUM_ARGS):
+        print("Error, invalid number of args, type -h for help")
+        exit()
+
     val_path = DEFAULT_VAL_PATH
     if len(sys.argv) < 2:
         print("Using default training dataset path")
