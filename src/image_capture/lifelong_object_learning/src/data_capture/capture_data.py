@@ -26,6 +26,7 @@ import sets
 import random
 import os
 import argparse
+import sys
 
 class Node:
     def __init__(self, image_topic, camera_info_topic,
@@ -209,13 +210,14 @@ def main():
 
     args = parser.parse_args()
 
-    if(len(sys.argv)):
+    num_necessary_args = 5
+    if(len(sys.argv) > num_necessary_args):
         print "Need to provide command line arguments, use \"-help\" to see examples."
         exit();
 
     # Initialize variables
     class_name = args.class_name
-    instance_name = class_name + "_" + args.class_number
+    instance_name = class_name + '_' + str(args.class_number)
 
     rospy.init_node('data_collector', anonymous=True)
 
