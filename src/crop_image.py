@@ -14,7 +14,7 @@ import sys
 import argparse
 
 # Definitions and Constants
-MIN_NUM_ARGS = 112
+MIN_NUM_ARGS = 5
 
 
 def crop(image_path, coords, saved_location):
