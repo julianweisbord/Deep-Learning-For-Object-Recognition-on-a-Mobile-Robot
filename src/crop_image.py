@@ -13,6 +13,9 @@ import os
 import sys
 import argparse
 
+# Definitions and Constants
+MIN_NUM_ARGS = 112
+
 
 def crop(image_path, coords, saved_location):
     """
@@ -44,10 +47,6 @@ def main():
         Output: None
     '''
 
-    if (len(sys.argv) < 5):
-        print("Error, invalid number of args, type -h for help")
-        exit()
-
     # Set up command line arguments
     parser = argparse.ArgumentParser(description='Image Cropping')
 
@@ -64,6 +63,10 @@ def main():
                         help='Desired dimensions to crop image to. Ex. 200 gives you 200x200')
 
     args = parser.parse_args()
+
+    if (len(sys.argv) < MIN_NUM_ARGS):
+        print("Error, invalid number of args, type -h for help")
+        exit()
 
     # Initialize variables
     object_class = args.class_name
