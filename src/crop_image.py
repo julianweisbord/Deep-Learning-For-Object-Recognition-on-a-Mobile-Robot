@@ -1,4 +1,3 @@
-
 '''
 Created on March 15th, 2018
 author: Michael Rodriguez
@@ -6,10 +5,10 @@ sources: https://www.blog.pythonlibrary.org/2017/10/03/how-to-crop-a-photo-with-
 description: Crops images of a given object class to feed into neural network.
 '''
 
-from PIL import Image
 import os
 import sys
 import argparse
+from PIL import Image
 
 # Definitions and Constants
 MIN_NUM_ARGS = 5
