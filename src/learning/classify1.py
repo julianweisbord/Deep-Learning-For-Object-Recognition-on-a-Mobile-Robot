@@ -22,8 +22,9 @@ from image_capture.prepare_data import PrepareData
 IMAGE_HEIGHT = 139
 IMAGE_WIDTH = 139
 COLOR_CHANNELS = 3
+IMG_DATA_PATH = '~/Downloads/image_data'
 SAVED_MODEL_PATH = 'robot-environment-model/in_resnet.yaml'
-DEFAULT_DATA_PATH = '../image_data/cropped_inference'
+DEFAULT_DATA_PATH = IMG_DATA_PATH + '/cropped_inference'
 CLASSES = ['book', 'chair', 'mug', 'screwdriver', 'stapler']
 N_CLASSES = len(CLASSES)
 
