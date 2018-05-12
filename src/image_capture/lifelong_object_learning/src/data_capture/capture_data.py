@@ -1,4 +1,9 @@
-#!/usr/bin/env python
+'''
+Created on February 9th, 2018
+author: Michael Rodriguez
+sources: http://docs.fetchrobotics.com/
+description: Module to collect image data with fetch robot.
+'''
 import rospy
 from tf import TransformListener, transformations
 from std_msgs.msg import String, Int32
@@ -18,39 +23,53 @@ import cv2
 import math
 import sets
 import random
-
+import os
+import argparse
+import sys
 
 class Node:
-    def __init__(self, image_topic, camera_info_topic, camera_frame, published_point_num_topic, published_point_base_topic, torso_movement_topic, head_movement_topic, num_published_points,
-        
-        max_spine_height, min_spine_height, spine_offset):
-
+    def __init__(self, image_topic, camera_info_topic,
+                 camera_frame, published_point_num_topic, published_point_base_topic,
+                 torso_movement_topic, head_movement_topic, num_published_points,
+                 max_spine_height, min_spine_height, spine_offset):
+        '''
+        Description: establishes the variabes included in the class
+        Input: self <Object>, image_topic <Object>, camera_info_topic <String>,
+            camera_frame <String>, published_point_num_topic <String>,
+            published_point_base_topic <String>, torso_movement_topic <String>,
+            head_movement_topic <String>, num_published_points <Int>,
+            max_spine_height <Int>, min_spine_height <Int>, spine_offset <Int>
+	    Return: None
+    	'''
         self.camera_frame = camera_frame
         self.published_point_base_topic = published_point_base_topic
         self.bridge = CvBridge()
         self.tf = TransformListener()
+
         rospy.Subscriber(image_topic, Image, self.image_callback)
         rospy.Subscriber(camera_info_topic, CameraInfo, self.camera_info_callback)
+
         self.robot_pose = None
         self.img = None
         self.pc = None
         self.camera_info = None
         self.num_published_points = num_published_points
-        self.published_points = [[0,0,0] for i in range(num_published_points)]
+        self.published_points = [[0, 0, 0] for i in range(num_published_points)]
         for i in range(num_published_points):
-            rospy.Subscriber(self.published_point_base_topic + str(i), PointStamped, self.point_published_callback, i)
+            rospy.Subscriber(self.published_point_base_topic + str(i),
+                             PointStamped, self.point_published_callback, i)
         self.points_registered = sets.Set()
 
         # base movement
         self.base_client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
         self.base_client.wait_for_server()
 
-        # # torso movement
+        # torso movement
         self.max_spine_height = max_spine_height
         self.min_spine_height = min_spine_height
         self.spine_offset = spine_offset
 
-        # # head movement
+        # head movement
         self.point_head_client = actionlib.SimpleActionClient(head_movement_topic, PointHeadAction)
         self.point_head_client.wait_for_server()
 
@@ -62,15 +81,31 @@ class Node:
         rospy.loginfo("move group end")
 
     def robot_pose_callback(self, data):
+        '''
+        Description: reset the ROS node pose to the stored value in data
+        Input: self <Object>, ar_tag_frame <String>, point topic <Object>
+	    Return: None
+    	'''
         self.robot_pose = data
 
     def image_callback(self, data):
+        '''
+        Description: reset the ROS node img data to the stored value in data
+        Input: self <Object>, data <Object>
+	    Return: None
+    	'''
         try:
             self.img = self.bridge.imgmsg_to_cv2(data, "bgr8")
         except CvBridgeError as e:
             print(e)
 
     def move_base_to(self, x, y, theta):
+        '''
+        Description: sends a position goal to the ROS node to move the robot
+                    base to
+        Input: self <Object>, x <Int>, y <Int>, theta <Float>
+	    Return: None
+    	'''
         goal = MoveBaseGoal()
         goal.target_pose.header.stamp = rospy.Time.now()
         goal.target_pose.header.frame_id = "map"
@@ -88,17 +123,33 @@ class Node:
         # send goal
         self.base_client.send_goal(goal)
 
-
     def move_torso(self, pose):
-        joint_names = ['torso_lift_joint', 'shoulder_pan_joint', 'shoulder_lift_joint', 'upperarm_roll_joint', 'elbow_flex_joint', 'forearm_roll_joint', 'wrist_flex_joint', 'wrist_roll_joint']
-        poses = [pose, 1.3192424769714355, 1.4000714648620605, -0.20049656002880095, 1.5290160491638183, -0.0004613047506046297, 1.660243449769287, -0.00012475593825578626]
+        '''
+        Description: calls the ROS node to adjust the robot torso from
+                    its current position to the input
+        Input: self <Object>, pose <Array>
+	    Return: perform movement
+    	'''
+        joint_names = ['torso_lift_joint', 'shoulder_pan_joint', 'shoulder_lift_joint',
+                       'upperarm_roll_joint', 'elbow_flex_joint', 'forearm_roll_joint',
+                       'wrist_flex_joint', 'wrist_roll_joint']
+
+        poses = [pose, 1.3192424769714355, 1.4000714648620605,
+                 -0.20049656002880095, 1.5290160491638183, -0.0004613047506046297,
+                 1.660243449769287, -0.00012475593825578626]
+
         self.move_group.moveToJointPosition(joint_names, poses, wait=False)   # plan
         self.move_group.get_move_action().wait_for_result()
-        result = self.move_group.get_move_action().get_result()
-        return result
 
+        return self.move_group.get_move_action().get_result()
 
     def look_at(self, frame_id, x, y, z):
+        '''
+        Description: sends the ROS node a goal position to move
+                    the head to face
+        Input: self <Object>, frame_id <Int>, x <Int>, y <Int>, z <Int>
+	    Return: None
+    	'''
         goal = PointHeadGoal()
         goal.target.header.stamp = rospy.Time.now()
         goal.target.header.frame_id = frame_id
@@ -115,20 +166,41 @@ class Node:
         self.point_head_client.send_goal(goal)
 
     def camera_info_callback(self, data):
+        '''
+        Description: resets the current camera info to the stored data
+        Input: self <Object>, data <Object>
+	    Return: None
+    	'''
         self.camera_info = data
 
-
     def key_callback(self, keypress):
+        '''
+        Description: sends a signal to cancel the current navigation goal
+        Input: self <Object>, keypress <Object>
+	    Return: None
+    	'''
         if keypress.data == "k":
             self.base_client.cancel_goal()
 
     def point_published_callback(self, data, point_id):
+        '''
+        Description: registers a point in the ROS node
+        Input: self <Object>, data <Object>, point_id <Int>
+	    Return: None
+    	'''
         self.points_registered.add(point_id)
         self.published_points[point_id][0] = data.point.x
         self.published_points[point_id][1] = data.point.y
         self.published_points[point_id][2] = data.point.z
 
     def sample_position(self, x_center, y_center, sample_max_radius, sample_min_radius):
+        '''
+        Description: generates a random position within a radius as a goal point
+                    for the robot
+        Input: self <Object>, x_center <Int>, y_center <Int>,
+                sample_max_radius <Int>, sample_min_radius <Int>
+	    Return: generated position <Array>
+    	'''
         min_x = x_center - sample_max_radius
         max_x = x_center - sample_min_radius*math.sin(.1745)
 
@@ -151,7 +223,6 @@ class Node:
 
         return position
 
-
     def get_img(self):
         return self.img
 
@@ -166,51 +237,90 @@ class Node:
 
 
 def euclidian_dist(point_1, point_2):
+    '''
+    Description: establishes the variabes included in the class
+    Input: point_1 <Array>, point_2 <Array>
+    Return: euclidian distance of two points <Float>
+    '''
     return math.sqrt((point_1[0] - point_2[0])**2 + (point_1[1] - point_2[1])**2 + (point_1[2] - point_2[2])**2)
 
 
-
-
 def main():
+    '''
+    Description: This function captures data on a given object class and
+                instance by having the robot randomly pick a goal and then
+                make a route to that goal to take a picture of the object.
+    Input: None
+    Return: None
+    '''
+    # Set up command line arguments
+    parser = argparse.ArgumentParser(description='Fetch Data Capture')
+
+    parser.add_argument('-c', '--class',
+                        dest='class_name', action='store',
+                        help='object class name: mug, stapler, book, etc...')
+
+    parser.add_argument('-n', '--num', '--number',
+                        dest='class_number', action='store',
+                        help='object number in data set: mug # 6, 7, 8, etc..')
+
+    args = parser.parse_args()
+
+    num_necessary_args = 5
+    if(len(sys.argv) > num_necessary_args):
+        print "Need to provide command line arguments, use \"-help\" to see examples."
+        exit();
+
+    # Initialize variables
+    class_name = args.class_name
+    instance_name = class_name + '_' + str(args.class_number)
 
     rospy.init_node('data_collector', anonymous=True)
 
+    num_published_points = 4
+    sample_min_radius = .6
+    sample_max_radius = 1
+    max_spine_height = .386
+    min_spine_height = 0.00313
+    spine_offset = 0.0
 
-    class_name = "screwdriver"
-    instance_name = "screwdriver_5"
-    capture_path = "/home/mccallm/catkin_ws/src/lifelong_object_learning/data_captured/"
+    # set starting_image_index back to 0 when doing a new object
+    starting_image_index = 0
+    desired_num_images = 80
 
+    # Relevant paths
+    results_path = "/home/mccallm/catkin_ws/src/lifelong_object_learning/data_captured/"
+    base_filepath = results_path + class_name + "/" + instance_name
+    image_filepath = results_path + class_name + "/" + instance_name + "/images/"
+    circle_image_filepath = results_path + class_name + "/" + instance_name + "/circle_images/"
+    image_data_filepath = results_path + class_name + "/" + instance_name + "/metadata/"
 
+    # Path dir creation
+    if not os.path.exists(results_path):
+        os.makedirs(results_path)
+    if not os.path.exists(base_filepath):
+        os.makedirs(base_filepath)
+    if not os.path.exists(image_filepath):
+        os.makedirs(image_filepath)
+    if not os.path.exists(circle_image_filepath):
+        os.makedirs(circle_image_filepath)
+    if not os.path.exists(image_data_filepath):
+        os.makedirs(image_data_filepath)
+
+    # ROS paths
     image_topic = "/head_camera/rgb/image_rect_color"
     camera_info_topic = "/head_camera/rgb/camera_info"
     map_frame = "/map"
     camera_frame = "/head_camera_rgb_optical_frame"
-    ar_tag_frame = "/april_tag_0"
     published_point_num_topic = "/object_point_num"
     published_point_base_topic = "/object_point"
     torso_movement_topic = "/torso_controller/follow_joint_trajectory"
     head_movement_topic = "/head_controller/point_head"
 
-    image_filepath = capture_path + class_name + "/" + instance_name +"/images/"
-    circle_image_filepath = capture_path + class_name + "/" + instance_name + "/circle_images/"
-    image_data_filepath = capture_path + class_name + "/" + instance_name + "/metadata/"
-
-    num_published_points = 4
-    sample_min_radius = .6
-    sample_max_radius = 1
-    sample_height = .5
-    height_offset = 1.0
-    num_positions_to_sample = 80
-    max_spine_height = .386
-    min_spine_height = 0.00313
-    spine_offset = 0.0
-    #set starting_image_index back to 0 when doing a new object
-    starting_image_index =0
-    desired_num_images = 80
-
-
-    node = Node(image_topic, camera_info_topic, camera_frame, published_point_num_topic, published_point_base_topic, torso_movement_topic, head_movement_topic, num_published_points,
-        max_spine_height, min_spine_height, spine_offset)
+    node = Node(image_topic, camera_info_topic, camera_frame,
+                published_point_num_topic, published_point_base_topic, torso_movement_topic,
+                head_movement_topic, num_published_points, max_spine_height,
+                min_spine_height, spine_offset)
 
     count_pub = rospy.Publisher('data_capture_index', String, queue_size=10)
 
@@ -218,7 +328,6 @@ def main():
     while node.camera_info is None:     # wait for camera info
         continue
     camera_model.fromCameraInfo(node.camera_info)
-
 
     while (len(node.points_registered) != node.num_published_points):
         rospy.loginfo(str(len(node.points_registered)))
@@ -228,42 +337,39 @@ def main():
     x_center = 0.0
     y_center = 0.0
     z_center = 0.0
+
     for i in range(node.num_published_points):
         x_center += node.published_points[i][0]
         y_center += node.published_points[i][1]
         z_center += node.published_points[i][2]
+
     x_center = x_center/node.num_published_points
     y_center = y_center/node.num_published_points
     z_center = z_center/node.num_published_points
-    
+
     rospy.loginfo("x center: " + str(x_center))
     rospy.loginfo("y center: " + str(y_center))
     rospy.loginfo("z center: " + str(x_center))
 
-
     # send first goal
     goalID = starting_image_index
     num_images_captured = starting_image_index
-    #numGoals = len(positions)
-    #position = positions[goalID]
     position = node.sample_position(x_center, y_center, sample_max_radius, sample_min_radius)
+
     goal_x = position[0]
     goal_y = position[1]
     goal_theta = position[2]
+
     rospy.loginfo("Goal is " + str(goal_x) + " " + str(goal_y) + " " + str(goal_theta))
     rospy.loginfo("Sending goal")
     node.move_base_to(goal_x, goal_y, goal_theta)
 
     g_status = GoalStatus()
 
-
     image_file_index = starting_image_index
-    rate = rospy.Rate(10) # 10hz
+    rate = rospy.Rate(10)  # 10hz
     while not rospy.is_shutdown():
-
-        # if preempted or failed, go to next goal
         if (node.base_client.get_state() == g_status.PREEMPTED) or ((node.base_client.get_state() == g_status.ABORTED) or (node.base_client.get_state() == g_status.REJECTED)):
-
             position = node.sample_position(x_center, y_center, sample_max_radius, sample_min_radius)
             goal_x = position[0]
             goal_y = position[1]
@@ -275,20 +381,15 @@ def main():
             rospy.loginfo("Sending goal")
             node.move_base_to(goal_x, goal_y, goal_theta)
 
-
         # when base reaches position, adjust spine and point camera at object
         if (node.base_client.get_state() == g_status.SUCCEEDED):
-
-            # # adjust spine height
-            # position = positions[goalID]
+            # adjust spine height
             spine_height = position[3]
 
             result = node.move_torso(spine_height)
-            # result = node.torso_client.wait_for_result()
             rospy.loginfo("Adjusting spine")
             if result:
                 if result.error_code.val == MoveItErrorCodes.SUCCESS:
-
                     rospy.loginfo("Spine adjustment succeeded")
 
                     # make robot look at object
@@ -298,74 +399,67 @@ def main():
                     result = node.point_head_client.wait_for_result()
                     rospy.loginfo(result)
 
-                    #if result.status == g_status.SUCCEEDED:
                     if result == True:
-
                         rospy.loginfo("Head turn succeeded")
-
                         rospy.sleep(.1)
-
-                    # if True:
-
-                        # rospy.loginfo("Sitting still")
-                        # rospy.sleep(2.0)
 
                         # capture and save image
                         img_cur = node.get_img()
                         rospy.sleep(.1)
                         if (img_cur is not None) and (len(node.points_registered) == node.num_published_points):
-
                             rospy.loginfo("Capturing image")
 
                             # find pixel coordinates of points of interest
                             # tl, tr, bl, br
                             ref_points = node.published_points
-
                             height, width, channels = img_cur.shape
 
-                            ref_points_camera_frame = []
                             points_to_write = []
                             for ref_point in ref_points:
                                 ps = PointStamped()
                                 ps.header.frame_id = map_frame
-                                ps.header.stamp = node.tf.getLatestCommonTime(camera_frame, ps.header.frame_id)
-                                # ps.header.stamp = rospy.Time.now()
+                                ps.header.stamp = node.tf.getLatestCommonTime(
+                                    camera_frame, ps.header.frame_id)
+
                                 ps.point.x = ref_point[0]
                                 ps.point.y = ref_point[1]
                                 ps.point.z = ref_point[2]
 
                                 ps_new = node.tf.transformPoint(camera_frame, ps)
-                                # ref_points_camera_frame.append([ps_new.point.x, ps_new.point.y, ps_new.point.z])
 
-                                (u,v) = camera_model.project3dToPixel((ps_new.point.x, ps_new.point.y, ps_new.point.z))
+                                (u, v) = camera_model.project3dToPixel(
+                                    (ps_new.point.x, ps_new.point.y, ps_new.point.z))
                                 points_to_write.append([int(round(u)), int(round(v))])
 
+                            image_file = image_filepath + instance_name + \
+                                "_" + str(image_file_index) + '.png'
+                            circle_image_file = circle_image_filepath + \
+                                instance_name + "_" + str(image_file_index) + '.png'
+                            text_file = image_data_filepath + instance_name + \
+                                "_" + str(image_file_index) + '.txt'
 
-                            image_file = image_filepath + instance_name + "_" + str(image_file_index) + '.png'
-                            circle_image_file = circle_image_filepath + instance_name + "_" + str(image_file_index) + '.png'
-                            text_file = image_data_filepath + instance_name + "_" + str(image_file_index) + '.txt'
                             f = open(text_file, 'w')
                             f.write(image_file + "\n")
                             f.write(str(height) + "\t" + str(width) + "\n")
+
                             for point in points_to_write:
                                 f.write(str(point[0]) + "\t")
                                 f.write(str(point[1]) + "\n")
+
                             f.write(str(goal_x) + "\n")
                             f.write(str(goal_y) + "\n")
-                            f.write(str(position[3]) + "\n")        # spine height
+                            f.write(str(position[3]) + "\n")     # spine height
                             f.close()
-
-
 
                             circle_img = img_cur.copy()
                             # visualize
                             for point in points_to_write:
-                               cv2.circle(circle_img, (point[0], point[1]), 2, (0, 0, 255), 3)
+                                cv2.circle(circle_img, (point[0], point[1]), 2, (0, 0, 255), 3)
 
                             cv2.imwrite(circle_image_file, circle_img)
 
                             cv2.imwrite(image_file, img_cur)
-                            image_file_index += 1                          
+                            image_file_index += 1
                             rospy.loginfo("Metadata and Image saved")
                             rospy.loginfo("Num images captured: " + str(image_file_index))
 
@@ -373,11 +467,9 @@ def main():
                             goalID += 1
                             num_images_captured += 1
 
-
-
-
             # Send next position
-            position = node.sample_position(x_center, y_center, sample_max_radius, sample_min_radius)
+            position = node.sample_position(
+                x_center, y_center, sample_max_radius, sample_min_radius)
             goal_x = position[0]
             goal_y = position[1]
             goal_theta = position[2]
@@ -391,12 +483,11 @@ def main():
             count_pub.publish("New goal ID is " + str(goalID))
             rospy.loginfo("New goal ID is " + str(goalID))
             rospy.loginfo("Goal is " + str(goal_x) + " " + str(goal_y) + " " + str(goal_theta))
-            rospy.loginfo("Sending goal")
+            rospy.loginfo("Sending goal...")
             node.move_base_to(goal_x, goal_y, goal_theta)
 
-
-
         rate.sleep()
+
 
 if __name__ == "__main__":
     main()

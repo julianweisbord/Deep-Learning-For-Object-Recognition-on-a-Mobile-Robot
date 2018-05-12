@@ -97,7 +97,7 @@ class PrepareData():
                     num_objects += 1
             print("num objects", num_objects)
             index = classes.index(field)
-
+            
             print('Now going to read {} files (Index: {})'.format(field, index))
             for i in range(1, num_objects + 1):
                 img = field + '_' + str(i) + '/images/'
