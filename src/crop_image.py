@@ -5,9 +5,7 @@ author: Michael Rodriguez
 sources: https://www.blog.pythonlibrary.org/2017/10/03/how-to-crop-a-photo-with-python/
 description: Crops images of a given object class to feed into neural network.
 '''
-# !/usr/bin/env python
-from os import listdir
-from os.path import splitext
+
 from PIL import Image
 import os
 import sys
@@ -18,18 +16,15 @@ MIN_NUM_ARGS = 5
 
 
 def crop(image_path, coords, saved_location):
-    """
-    crop - Image cropping function
-    This function creates an image object to manipulate and
+    '''
+    Description: Creates an image object to manipulate and
     crop to the desired dimensions. It then saves it in the
     path that it was given.
-    # Arguments
-        image_path: The path to the image to edit
-        coords: A tuple of x/y coordinates (x1, y1, x2, y2)
-        saved_location: Path to save the cropped image
-    # Return
-        Outputs cropped images to given saved image path.
-    """
+    Input:  image_path: String path of the image to edit
+            coords: A tuple of x/y coordinates (x1, y1, x2, y2)
+            saved_location: String path to save the cropped image
+    Return: Outputs cropped images to given saved image path.
+    '''
     image_obj = Image.open(image_path)
     cropped_image = image_obj.crop(coords)
     cropped_image.save(saved_location)
@@ -37,17 +32,13 @@ def crop(image_path, coords, saved_location):
 
 def main():
     '''
-    main - Image cropping module
-    This function crops images for the number image classes of a given object.
+    Description: Crops images for the number image classes of a given object.
     The function takes an entire image class folder and loops through all
     instances within it cropping each one and saving it in a new directory.
-    # Arguments
-        None
-    # Returns
-        Output: None
+    Input:  None
+    Return: None
     '''
-
-    # Set up command line arguments
+    # Setting up command line arguments
     parser = argparse.ArgumentParser(description='Image Cropping')
 
     parser.add_argument('-c', '--class',
@@ -102,7 +93,7 @@ def main():
             os.makedirs(save_image_path)
 
         # grab all files in directory
-        files = [f for f in listdir(text_file_path) if f.endswith(".txt")]
+        files = [f for f in os.listdir(text_file_path) if f.endswith(".txt")]
         for file in files:
 
             path_to_images = image_class_path + "/" + object_class + "_" + object_instance + "/images/"
@@ -113,7 +104,7 @@ def main():
             if index == num_files:
                 break
 
-            file_base = splitext(file)[0]
+            file_base = os.path.splitext(file)[0]
             image_file_name = file_base + ".png"
             print "Object Number: ", object_instance, " Index: ", index  # Printing index of current image
             lines = [line.rstrip('\n') for line in open(text_file_path + file)]
