@@ -39,7 +39,7 @@ from keras.applications.resnet50 import preprocess_input
 
 import model as mdl
 
-IMG_DATA_PATH = '~/Downloads/image_data'
+IMG_DATA_PATH = '/Users/mccallm/Downloads/image_data/'
 BASE_WEIGHT_URL = 'https://github.com/fchollet/deep-learning-models/releases/download/v0.7/'
 CLASSES = ['book', 'chair', 'mug', 'screwdriver', 'stapler']
 DEFAULT_TRAIN_PATH = IMG_DATA_PATH + '/train'
