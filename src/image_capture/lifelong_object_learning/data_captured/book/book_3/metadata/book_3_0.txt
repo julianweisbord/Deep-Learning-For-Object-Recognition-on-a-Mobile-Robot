@@ -1,0 +1,9 @@
+/home/mccallm/catkin_ws/src/lifelong_object_learning/data_captured/book/book_3/images/book_3_0.png
+480	640
+528	504
+261	337
+194	319
+420	496
+0.823697089779
+-1.49861983774
+0.323614075493

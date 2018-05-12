@@ -1,0 +1,9 @@
+/home/mccallm/catkin_ws/src/lifelong_object_learning/data/captured/screwdriver/screwdriver_2/images/screwdriver_2_0.png
+480	640
+141	340
+412	312
+473	297
+207	351
+0.870018764958
+-0.10981072726
+0.141254695625

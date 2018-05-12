@@ -12,27 +12,30 @@ description: Convolutional Neural Network that takes different images and
 # External Imports
 import time
 import sys
+import numpy as np
 import tensorflow as tf
 # Local Imports
 from image_capture.prepare_data import PrepareData
 
 # Definitions and Constants
-CLASSES = ['bowl', 'calculator', 'cell_phone', 'notebook']
-NUM_OBJECTS = 5  # Number of different objects per object class
+CLASSES = ['book', 'chair', 'mug', 'screwdriver', 'stapler']
+NUM_OBJECTS_PER_CLASS = 5  # Number of different objects per object class
 IMAGE_HEIGHT = 112
 IMAGE_WIDTH = 112
 IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT
 COLOR_CHANNELS = 3
 WEIGHT_SIZE = 5
-BATCH_SIZE = 50
+BATCH_SIZE = 50  # Number of images per step or iteration
 KEEP_RATE = 0.8
-N_EPOCHS = 800
+N_EPOCHS = 800  # One iteration over all of the training data
 FC_NEURON_SIZE = 1024  # Chosen randomly for now
 N_CLASSES = len(CLASSES)
-FC_NUM_FEATURES = IMAGE_WIDTH * IMAGE_HEIGHT * N_CLASSES
-DEFUALT_TRAIN_PATH = '../image_data/captured_cropped'
+FC_NUM_FEATURES = np.int32(IMAGE_WIDTH * IMAGE_HEIGHT * N_CLASSES * .8)
+DEFAULT_TRAIN_PATH = '../image_data/cropped'
+SAVED_MODEL_PATH = 'robot-environment-model/'
 VALIDATION_SIZE = .2
 LEARNING_RATE = .001
+
 
 WEIGHTS = {
     # W_conv1 : Take 1 input, produce 32 output features, Convolution window is  WEIGHT_SIZE * WEIGHT_SIZE
@@ -54,7 +57,7 @@ def grab_dataset(train_path):
     '''
 
     image_data = PrepareData()
-    train_data, valid_data = image_data.read_train_sets(train_path, NUM_OBJECTS, CLASSES,
+    train_data, valid_data = image_data.read_train_sets(train_path, NUM_OBJECTS_PER_CLASS, CLASSES,
                                                         (IMAGE_WIDTH, IMAGE_HEIGHT),
                                                         VALIDATION_SIZE)
     return train_data, valid_data
@@ -72,13 +75,14 @@ def model_setup(x, keep_prob):
     conv1 = maxpool2d(conv1)
     conv2 = tf.nn.relu(conv2d(conv1, WEIGHTS['W_conv2']) + BIASES['b_conv2'])
     conv2 = maxpool2d(conv2)
+    conv2shape = conv2.get_shape().as_list()
+    print("conv2shape: ", conv2shape)
     # All of the neurons in conv2 will connect to every neuron in fc
-    layer_shape = conv2.get_shape()
-
-    num_features = layer_shape[1:4].num_elements()
-    flatten = tf.reshape(conv2, [-1, num_features])  # shape is [batch_size, features], -1 makes dynamic argument
+    flatten = tf.reshape(conv2, [-1, conv2shape[1] * conv2shape[2] * conv2shape[3]])
+    print("flatten shape", flatten.get_shape())
     fc = tf.nn.relu(tf.matmul(flatten, WEIGHTS['W_fc']) + BIASES['b_fc'])
     output = tf.matmul(fc, WEIGHTS['out']) + BIASES['out']
+    print("output shape:", output.shape)
     return output
 
 def loss(prediction, y):
@@ -106,19 +110,22 @@ def train(x, y, keep_prob, train_path):
     prediction = model_setup(x, keep_prob)
     optimizer, cost = loss(prediction, y)
     train_data, valid_data = grab_dataset(train_path)
+    save_model = tf.train.Saver()
+
     # Compute the accuracy of the model
     correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
     accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
+
         for epoch in range(N_EPOCHS):
             epoch_x, epoch_y = train_data.next_batch(BATCH_SIZE)
             train_accuracy = accuracy.eval({x:epoch_x, y:epoch_y})
             print('step %d, training accuracy %g' % (epoch, train_accuracy))
             sess.run([optimizer, cost], feed_dict={x: epoch_x, y: epoch_y})
-
         print('Test Accuracy:', accuracy.eval({x:valid_data.images, y:valid_data.labels, keep_prob: 1.0}))
+        save_model.save(sess, SAVED_MODEL_PATH)
     end_time = time.time() - start_time
     print("Total time", end_time)
 
@@ -142,13 +149,13 @@ def maxpool2d(x):
 def main():
     if len(sys.argv) != 2:
         print("Using default training dataset path")
-        train_path = DEFUALT_TRAIN_PATH
+        train_path = DEFAULT_TRAIN_PATH
     else:
         train_path = sys.argv[1]
 
-    x = tf.placeholder(tf.float32, shape=[None, IMAGE_WIDTH, IMAGE_HEIGHT, COLOR_CHANNELS])
+    x = tf.placeholder(tf.float32, shape=[None, IMAGE_WIDTH, IMAGE_HEIGHT, COLOR_CHANNELS], name = "x")
     keep_prob = tf.placeholder(tf.float32)
-    y = tf.placeholder(tf.float32, shape=[None, N_CLASSES])
+    y = tf.placeholder(tf.float32, shape=[None, N_CLASSES], name="y")
 
     train(x, y, keep_prob, train_path)
 

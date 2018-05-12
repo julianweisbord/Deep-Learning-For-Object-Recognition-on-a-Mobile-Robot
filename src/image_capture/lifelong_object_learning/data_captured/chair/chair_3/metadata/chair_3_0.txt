@@ -1,0 +1,9 @@
+/home/mccallm/catkin_ws/src/lifelong_object_learning/data_captured/chair/chair_3/images/chair_3_0.png
+480	640
+560	290
+358	703
+-51	482
+322	201
+-1.20425629423
+-1.1445626907
+0.0958595281497

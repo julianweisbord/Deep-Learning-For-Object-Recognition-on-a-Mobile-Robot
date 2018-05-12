@@ -1,0 +1,9 @@
+/home/mccallm/catkin_ws/src/lifelong_object_learning/data/captured/screwdriver/screwdriver_1/images/screwdriver_1_0.png
+480	640
+216	296
+266	243
+400	254
+372	304
+1.22830462903
+1.42366016722
+0.16815440466

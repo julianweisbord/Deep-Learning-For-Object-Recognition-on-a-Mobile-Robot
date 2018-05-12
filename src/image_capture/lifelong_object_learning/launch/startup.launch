@@ -1,0 +1,21 @@
+<launch>
+
+  <!-- robot localization and navigation -->
+  <include file="$(find fetch_navigation)/launch/fetch_nav.launch">
+    <!-- Be sure to change "name_of_map" with the name of your map-->
+    <arg name="map_file" value="$(find lifelong_object_learning)/mapping/name_of_map.yaml"/>
+    <!-- Be sure to change "name_of_map_keepout" with the name of your map_keepout file -->
+    <arg name="map_keepout_file" value="$(find lifelong_object_learning)/mapping/name_of_map_keepout.yaml"/>
+    <arg name="use_keepout" value="true" />
+  </include>
+
+  <!-- move it -->
+  <include file="$(find fetch_moveit_config)/launch/move_group.launch" />
+
+  <!-- static point publisher -->
+  <node pkg="lifelong_object_learning" type="point_publisher.py" name="point_publisher"/>
+ 
+  <!-- keyboard monitor -->
+  <node pkg="lifelong_object_learning" type="keyboard_monitor.py" name="keyboard_monitor" />
+
+</launch>

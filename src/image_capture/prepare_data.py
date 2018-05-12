@@ -75,15 +75,16 @@ class PrepareData():
         '''
         images = []
         labels = []  # One-hot encoding array
-        img_names = []  # img file base path
+        img_names = []  # img file base path, the png file
         class_name = []  # Classes english name
 
-        for fields in classes:
-            index = classes.index(fields)
-            print('Now going to read {} files (Index: {})'.format(fields, index))
-            for i in range(num_objects):
-                img1 = fields + '_' + str(i)  # Just do first 5 image folders for now
-                path = os.path.join(train_path, fields, img1, "images", fields)
+        for field in classes:
+            index = classes.index(field)
+            print('Now going to read {} files (Index: {})'.format(field, index))
+            for i in range(1, num_objects + 1):
+                img = field + '_' + str(i) + '/images/'
+                path = os.path.join(train_path, field, img)
+                print("path", path)
                 files = glob.glob(path + '*')
 
                 for img in files:
@@ -97,7 +98,7 @@ class PrepareData():
                     labels.append(label)
                     flbase = os.path.basename(img)  # Name of image
                     img_names.append(flbase)
-                    class_name.append(fields)
+                    class_name.append(field)
         images = np.array(images)
         labels = np.array(labels)
         img_names = np.array(img_names)
@@ -121,6 +122,9 @@ class Dataset():
         self.class_name = class_name
         self.epochs_complete = 0
         self.index_in_epoch = 0
+        print("labels: ", labels[1], "END")
+        print("img names: ", img_names[1], "END")
+        print("class names: ", class_name[1], "END")
 
     def next_batch(self, batch_size):
         '''
@@ -130,12 +134,10 @@ class Dataset():
         '''
         start = self.index_in_epoch
         self.index_in_epoch += batch_size
-
         if self.index_in_epoch > self.num_examples:
             self.epochs_complete += 1
             start = 0
             self.index_in_epoch = batch_size
             assert batch_size <= self.num_examples
         end = self.index_in_epoch
-
         return self.images[start:end], self.labels[start:end]

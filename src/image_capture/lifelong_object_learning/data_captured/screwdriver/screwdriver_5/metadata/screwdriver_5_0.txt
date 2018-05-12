@@ -1,0 +1,9 @@
+/home/mccallm/catkin_ws/src/lifelong_object_learning/data_captured/screwdriver/screwdriver_5/images/screwdriver_5_0.png
+480	640
+155	137
+545	112
+518	361
+172	312
+1.36052994518
+0.282748309728
+0.0753437995681

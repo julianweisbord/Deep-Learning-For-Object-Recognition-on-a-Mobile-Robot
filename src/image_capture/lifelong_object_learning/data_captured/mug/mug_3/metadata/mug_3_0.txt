@@ -1,0 +1,9 @@
+/home/mccallm/catkin_ws/src/lifelong_object_learning/data_captured/mug/mug_3/images/mug_3_0.png
+480	640
+451	336
+237	342
+204	362
+413	346
+0.342993866151
+-1.80207866872
+0.383265030092
