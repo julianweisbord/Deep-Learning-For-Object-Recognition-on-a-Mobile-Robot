@@ -1,0 +1,9 @@
+\contentsline {section}{\numberline {I}Introduction}{1}{section.1}
+\contentsline {section}{\numberline {II}Areas of Research}{1}{section.2}
+\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {II-A}}Data Gathering}{1}{subsection.2.1}
+\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {II-B}}Image Cropping}{1}{subsection.2.2}
+\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {II-C}}Neural Network Model}{1}{subsection.2.3}
+\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {II-D}}Online Learning Techniques}{1}{subsection.2.4}
+\contentsline {section}{\numberline {III}Results}{1}{section.3}
+\contentsline {section}{\numberline {IV}Conclusion}{1}{section.4}
+\contentsline {section}{Appendix}{1}{section*.5}
