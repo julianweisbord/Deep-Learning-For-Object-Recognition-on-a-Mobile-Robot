@@ -1,73 +1,106 @@
 '''
-Created on March 2nd, 2018
+Created on May 9th, 2018
 author: Julian Weisbord
+sources: https://machinelearningmastery.com/save-load-keras-deep-learning-models/
 description: This is the inference layer, it runs a novel image set through
                 the model and outputs the model's accuracy. If the novel
                 image set is accurate enough, this modules adds it to
                 the full data set.
 
 '''
-
 # External Imports
+import os
 import sys
+import glob
 import numpy as np
-import tensorflow as tf
+from keras.models import model_from_yaml
+from keras.preprocessing import image
+from keras.applications.resnet50 import preprocess_input
 # Local Imports
 from image_capture.prepare_data import PrepareData
 
 # Definitions and Constants
-IMAGE_HEIGHT = 112
-IMAGE_WIDTH = 112
+IMAGE_HEIGHT = 139
+IMAGE_WIDTH = 139
 COLOR_CHANNELS = 3
-SAVED_MODEL_PATH = 'robot-environment-model/model.meta'
+SAVED_MODEL_PATH = 'robot-environment-model/in_resnet.yaml'
 DEFAULT_DATA_PATH = '../image_data/cropped_inference'
+CLASSES = ['book', 'chair', 'mug', 'screwdriver', 'stapler']
+N_CLASSES = len(CLASSES)
 
-def grab_dataset(dataset_path):
+def grab_dataset(dataset_path, classes=None, num_objects=0):
     '''
-    Description: This function grabs the collected image data from novel_image_prep.py
-    Return: <Tuple of Datasets> The training and validation datasets.
-    '''
-    pred_data = PrepareData()
-    dataset = pred_data.read_train_sets(dataset_path,
-                                             (IMAGE_WIDTH, IMAGE_HEIGHT),
-                                             validation_size=0, classes=None, num_objects=None)
-    return dataset
+    # Description: This function grabs the collected image data from novel_image_prep.py
+    # Return: <Tuple of Datasets> The training and validation datasets.
+    # '''
+    # pred_data = PrepareData()
+    # dataset = pred_data.read_train_sets(dataset_path,
+    #                                     (IMAGE_WIDTH, IMAGE_HEIGHT),
+    #                                     validation_size=0, classes=None, num_objects=None)
+    # Check which object folders are actually in the train_path
+    # print("os.listdir: ", os.listdir(DEFAULT_DATA_PATH))
+    labels = []
+    file_paths = []
+    if not classes:
+        classes = []
+        for cls in os.listdir(DEFAULT_DATA_PATH):
 
-def classify(dataset):
-    # print("dataset", dataset.images)
-    # x_batch, labels = tf.reshape(dataset, shape=[-1, IMAGE_HEIGHT, IMAGE_WIDTH, COLOR_CHANNELS])
+            classes.append(cls)
 
-    batch = dataset.images
-    print("batch shape", batch.shape)
+    for field in classes:
+        print("classes: ", classes)
+        # Determine number of objects that were captured per object class
+        if not num_objects:
+            num_objects = 0
+            for _ in os.listdir(DEFAULT_DATA_PATH + '/' + field):
+                num_objects += 1
+        print("num objects", num_objects)
+        index = classes.index(field)
 
-    # batch.reshape(1, IMAGE_WIDTH, IMAGE_HEIGHT, COLOR_CHANNELS)
-    # exit()
-    labels = dataset.labels
-    y = tf.placeholder(tf.float32, shape=[None, len(labels)], name="y")
-    with tf.Session() as sess:
+        print('Now going to read {} files (Index: {})'.format(field, index))
+        for i in range(1, num_objects + 1):
+            img = field + '_' + str(i) + '/images/'
+            path = os.path.join(DEFAULT_DATA_PATH, field, img)
+            print("path", path)
+            files = glob.glob(path + '*')
+            for img in files:
+                label = np.zeros(N_CLASSES)
+                label[index] = 1.0
+                labels.append(label)
+            file_paths.append(files)
+    # print("labels: ", labels)
 
-        saved_model = tf.train.import_meta_graph(SAVED_MODEL_PATH)
-        saved_model.restore(sess, tf.train.latest_checkpoint('./robot-environment-model/'))
+    return file_paths, labels
 
-        graph = tf.get_default_graph()
-        # for op in graph.get_operations():
-        #     print(str(op.values()))
-        # print(tf.all_variables())
-        x = graph.get_tensor_by_name("x:0")
-        y_true = graph.get_tensor_by_name("y:0")
-        prediction = graph.get_tensor_by_name("Prediction/add:0")
+def classify(file_paths, labels):
 
-        # prediction =
-        # exit()
-        # y_pred = graph.get_tensor_by_name("output:0")
-        # y_test_images = np.zeros((1, 2))
-        print("image shape: ", batch.shape)
-        print("label shape: {}".format(labels.shape))
-        print("y_true.shape: ", y_true.shape)
-        feed_dict_testing = {x: batch, y_true: labels}
-        result = sess.run(prediction, feed_dict=feed_dict_testing)
+    # print("file_paths", file_paths)
+    # load YAML and restore model
+    yaml_file = open(SAVED_MODEL_PATH, 'r')
+    loaded_model_yaml = yaml_file.read()
+    yaml_file.close()
+    loaded_model = model_from_yaml(loaded_model_yaml)
 
-    return result
+    predictions = []
+    count = 0
+    for field_arr in file_paths:
+        # print("field_arr", field_arr)
+        for img_path in field_arr:
+            # print("img_path", img_path)
+            # print("count", count)
+
+            img = image.load_img(img_path, target_size=(IMAGE_WIDTH, IMAGE_HEIGHT))
+            img = image.img_to_array(img)
+            x = np.expand_dims(img, axis=0)
+            x = preprocess_input(x)
+            preds = loaded_model.predict(x, batch_size=10, verbose=1)
+            # cls = np.argmax(preds)
+            print("Prediction: ", preds)
+            print("count: ", count)
+            print("label for this val: ", labels[count])
+            count += 1
+
+    return predictions, labels
 
 def main():
     if len(sys.argv) == 2:
@@ -77,10 +110,9 @@ def main():
         print("Using default dataset path instead of command line args")
         prediction_data = DEFAULT_DATA_PATH
 
-    dataset = grab_dataset(prediction_data)
-    prediction = classify(dataset)
-    print("Prediction: ", prediction)
-
+    file_paths, labels = grab_dataset(prediction_data)
+    predictions, correct_values = classify(file_paths, labels)
+    # print("Prediction: ", prediction)
 
 if __name__ == '__main__':
     main()

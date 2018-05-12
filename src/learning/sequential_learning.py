@@ -7,6 +7,7 @@ description:
 
 '''
 # External Imports
+import sys
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from IPython import display
@@ -20,20 +21,24 @@ from image_capture.prepare_data import PrepareData
 
 SAVED_MODEL_PATH = 'robot-environment-model/.data-00000-of-00001'
 NEW_IMAGE_PATH = '../image_data/cropped_new_task/'
+SAVED_MODEL_BASE = './robot-environment-model/'
+SAVED_MODEL_PATH = 'robot-environment-model/model.meta'
 CLASSES = ['book', 'chair', 'mug', 'screwdriver', 'stapler']
 N_CLASSES = len(CLASSES)
 NUM_OBJECTS_PER_CLASS = 1
 IMAGE_HEIGHT = 112
 IMAGE_WIDTH = 112
+WEIGHT_SIZE = 5
 IMAGE_SIZE = IMAGE_WIDTH * IMAGE_HEIGHT
 COLOR_CHANNELS = 3
 VALIDATION_SIZE = .2
 LAMBDA_OPTIONS = [0, 1, 2, 5, 15]
 LEARNING_RATE = .001
-ITERATIONS = 200
 COMPARE_TO_SGD = True
+NUM_ITERATIONS = 10
+BATCH_SIZE = 10
 
-def grab_dataset(self, train_path):
+def grab_dataset(train_path):
     '''
     Description: This function grabs the collected image data from prepare_data.py
     Return: <Tuple of Datasets> The training and validation datasets.
@@ -45,14 +50,14 @@ def grab_dataset(self, train_path):
         # Also notice NUM_OBJECTS_PER_CLASS is not in read_data_sets_facade, this may be
         # different each type so it should not be a constant. We will have to determine
         # this value from the directory structure.
-    train_data, val_data = image_data.read_data(train_path,
-                                                (IMAGE_WIDTH, IMAGE_HEIGHT),
-                                                VALIDATION_SIZE)
+    train_data, val_data = image_data.read_train_sets(train_path,
+                                                      (IMAGE_WIDTH, IMAGE_HEIGHT),
+                                                      VALIDATION_SIZE)
     return train_data, val_data
 
 
-class EWCModel:
-    def __init__(self, new_train_path, model, model_type):
+class EWCModel():
+    def __init__(self, new_train_path, model, model_type, x, y_):
         self.accuracy = 0
         self.F_accum = []
         self.var_list = []
@@ -71,18 +76,19 @@ class EWCModel:
         w1 = graph.get_tensor_by_name("w1:0")
         w2 = graph.get_tensor_by_name("w2:0")
         b1 = graph.get_tensor_by_name("b1:0")
-        b2 = graph.get_tensor_by_name("b1:0")
-        self.optimal_vars.append(w1, b1, w2, b2)
+        b2 = graph.get_tensor_by_name("b2:0")
+        self.optimal_vars = [w1, b1, w2, b2]
 
 
     def create_vars(self):
         w1 = tf.Variable(tf.random_normal([WEIGHT_SIZE, WEIGHT_SIZE, COLOR_CHANNELS, 32]))
-        b1 = tf.Variable(tf.random_normal([32]))
+        b1 = tf.Variable(tf.constant(0.1, shape=[32]))
         w2 = tf.Variable(tf.random_normal([WEIGHT_SIZE, WEIGHT_SIZE, 32, 64]))
-        b2 = tf.Variable(tf.random_normal([64])
+        b2 = tf.Variable(tf.constant(0.1, shape=[64]))
         self.var_list = [w1, b1, w2, b2]
 
     def new_task_model(self):
+        # Set up the second task's model
         if self.model_type == "model":
             prediction = mdl.model_setup(self.x, self.keep_prob)
             with tf.name_scope('SequentialLearningCrossEntropy'):
@@ -106,7 +112,7 @@ class EWCModel:
             self.train_step = tf.train.GradientDescentOptimizer(LEARNING_RATE).minimize(self.cross_entropy)
 
 
-    def compute_fisher(self, prediction, imgset, num_samples=200, plot=False):
+    def compute_fisher(self, prediction, imgset, sess, num_samples=200, plot=False):
         self.F_accum = []
         for v in range(len(self.var_list)):
             self.F_accum.append(np.zeros(self.var_list[v].get_shape().as_list()))
@@ -134,11 +140,22 @@ class EWCModel:
             # Probably should switch to adam optimizer
             self.train_step = tf.train.GradientDescentOptimizer(LEARNING_RATE).minimize(self.ewc_loss)
 
-    def train(self, online, display_freq, train_data, val_data):
-        pass
+    def train(self, online, sess, display_freq, train_data, val_data,x, y_, lams, ewc=False):
+        if ewc:
+            online.update_ewc_loss(lams)
+        else:
+            online.vanilla_sgd()
+
+        for _ in range(NUM_ITERATIONS):
+            epoch_x, epoch_y = train_data.next_batch(BATCH_SIZE)
+
+            online.train_step.run(feed_dict={x: epoch_x, y_: epoch_y})
 
     def save_optimal_vars(self):
-        pass
+        self.star_vars = []
+
+        for v in range(len(self.var_list)):
+            self.star_vars.append(self.var_list[v].eval())
 
     def plot_test_acc(self, plot_handles):
         plt.legend(handles=plot_handles, loc="center right")
@@ -168,25 +185,21 @@ def main():
 
     with tf.Session() as sess:
         try:
-            tf.Saver.restore(sess, SAVED_MODEL_PATH)
+            saved_model = tf.train.import_meta_graph(SAVED_MODEL_PATH)
+            saved_model.restore(sess, tf.train.latest_checkpoint(SAVED_MODEL_BASE))
         except:
             print("You need to have already run model.py without sequential learning")
-
+        display_freq = 10
+        x = tf.placeholder(tf.float32, shape=[None, IMAGE_WIDTH, IMAGE_HEIGHT, COLOR_CHANNELS], name = "x")
+        y_ = tf.placeholder(tf.float32, shape=[None, N_CLASSES], name="y")
         train_data, val_data = grab_dataset(new_train_path)
-        online = EWCModel(new_train_path, sess, model_type)
+        online = EWCModel(new_train_path, sess, model_type, x, y_)
 
         prediction = online.new_task_model()
-        online.compute_fisher(prediction, val_data, num_samples=train_data.get_shape()[0])
-        online.train(online, display_freq, train_data, val_data)
-        # online.update_ewc_loss(LAMBDA_OPTIONS[4])
+        online.compute_fisher(prediction, val_data.images, sess, num_samples=len(train_data.images[0]))
+        online.train(online, sess, display_freq, train_data, val_data, x, y_, LAMBDA_OPTIONS[4], ewc=True)
 
-
-
-        for iteration in range(NUM_ITERATIONS):
-            epoch_x, epoch_y = train_data.next_batch(BATCH_SIZE)
-
-            sess.run([optimizer, cost], feed_dict={x: epoch_x, y: epoch_y})
-            online.train_step.run(feed_dict={x: epoch_x, y_: epoch_y})
+        online.save_optimal_vars()
 
 if __name__ == '__main__':
     main()
