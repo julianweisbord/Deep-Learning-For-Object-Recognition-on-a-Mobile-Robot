@@ -17,15 +17,9 @@ import tf
 class PointPublisher:
     def __init__(self, ar_tag_frame, point_topic):
         '''
-            __init__ establishes the variabes included in the class
-    	    # Arguments
-    			self: class definition
-                ar_tag_frame: data structure used for AR tags
-                point_topic: ROS topic describing a point
-    	    # Returns
-    			Sets all default values of class variables
-    	    # Raises
-    			None
+        Description: establishes the variabes included in the class
+        Input: self <Class>, ar_tag_frame <String>, point topic <Object>
+	    Return: None
     	'''
         rospy.Subscriber(point_topic, PointStamped, self.point_callback)
         self.tf = tf.TransformListener()
@@ -38,14 +32,10 @@ class PointPublisher:
 
     def point_callback(self, data):
         '''
-            point_callback takes point data and
-                calls ROS functions to publish the point
-    	    # Arguments
-    			self: class definition
-    	    # Returns
-                Publishes a ROS point
-    	    # Raises
-    			None
+        Description: This function takes point data and
+            calls ROS functions to publish the point
+        Input: self <Class>, point data
+	    Return: None
     	'''
         point = data
         self.points.append(point)
@@ -58,16 +48,12 @@ class PointPublisher:
 
 def main():
     '''
-		main establishes a ROS connection and opens a point publisher.
-            It loops continuously, publishing updated ROS points, creating
-            associated markers, and keeping track of odometry and orientation.
-	    # Arguments
-			None
-	    # Returns
-            None
-	    # Raises
-			None
-	'''
+    Description: establishes a ROS connection and opens a point publisher.
+        It loops continuously, publishing updated ROS points, creating
+        associated markers, and keeping track of odometry and orientation.
+    Input: None
+    Return: None
+    '''
     ar_tag_frame = '/tag_0'
     point_topic = '/clicked_point'
 

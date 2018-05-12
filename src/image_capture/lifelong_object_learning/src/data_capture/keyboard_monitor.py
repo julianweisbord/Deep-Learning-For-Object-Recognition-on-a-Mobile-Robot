@@ -24,13 +24,9 @@ moveBindings = {
 
 def getKey():
 	'''
-		getKey is called to check standard input for user input
-	    # Arguments
-			None
-	    # Returns
-			Value of key
-	    # Raises
-			None
+	Description: getKey is called to check standard input for user input
+    Input: None
+    Return: Value of key
 	'''
 	tty.setraw(sys.stdin.fileno())
 	select.select([sys.stdin], [], [], 0)

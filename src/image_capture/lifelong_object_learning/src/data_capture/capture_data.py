@@ -4,7 +4,6 @@ author: Michael Rodriguez
 sources: http://docs.fetchrobotics.com/
 description: Module to collect image data with fetch robot.
 '''
-
 import rospy
 from tf import TransformListener, transformations
 from std_msgs.msg import String, Int32
@@ -33,7 +32,15 @@ class Node:
                  camera_frame, published_point_num_topic, published_point_base_topic,
                  torso_movement_topic, head_movement_topic, num_published_points,
                  max_spine_height, min_spine_height, spine_offset):
-
+        '''
+        Description: establishes the variabes included in the class
+        Input: self <Object>, image_topic <Object>, camera_info_topic <String>,
+            camera_frame <String>, published_point_num_topic <String>,
+            published_point_base_topic <String>, torso_movement_topic <String>,
+            head_movement_topic <String>, num_published_points <Int>,
+            max_spine_height <Int>, min_spine_height <Int>, spine_offset <Int>
+	    Return: None
+    	'''
         self.camera_frame = camera_frame
         self.published_point_base_topic = published_point_base_topic
         self.bridge = CvBridge()
@@ -74,15 +81,31 @@ class Node:
         rospy.loginfo("move group end")
 
     def robot_pose_callback(self, data):
+        '''
+        Description: reset the ROS node pose to the stored value in data
+        Input: self <Object>, ar_tag_frame <String>, point topic <Object>
+	    Return: None
+    	'''
         self.robot_pose = data
 
     def image_callback(self, data):
+        '''
+        Description: reset the ROS node img data to the stored value in data
+        Input: self <Object>, data <Object>
+	    Return: None
+    	'''
         try:
             self.img = self.bridge.imgmsg_to_cv2(data, "bgr8")
         except CvBridgeError as e:
             print(e)
 
     def move_base_to(self, x, y, theta):
+        '''
+        Description: sends a position goal to the ROS node to move the robot
+                    base to
+        Input: self <Object>, x <Int>, y <Int>, theta <Float>
+	    Return: None
+    	'''
         goal = MoveBaseGoal()
         goal.target_pose.header.stamp = rospy.Time.now()
         goal.target_pose.header.frame_id = "map"
@@ -101,6 +124,12 @@ class Node:
         self.base_client.send_goal(goal)
 
     def move_torso(self, pose):
+        '''
+        Description: calls the ROS node to adjust the robot torso from
+                    its current position to the input
+        Input: self <Object>, pose <Array>
+	    Return: perform movement
+    	'''
         joint_names = ['torso_lift_joint', 'shoulder_pan_joint', 'shoulder_lift_joint',
                        'upperarm_roll_joint', 'elbow_flex_joint', 'forearm_roll_joint',
                        'wrist_flex_joint', 'wrist_roll_joint']
@@ -115,6 +144,12 @@ class Node:
         return self.move_group.get_move_action().get_result()
 
     def look_at(self, frame_id, x, y, z):
+        '''
+        Description: sends the ROS node a goal position to move
+                    the head to face
+        Input: self <Object>, frame_id <Int>, x <Int>, y <Int>, z <Int>
+	    Return: None
+    	'''
         goal = PointHeadGoal()
         goal.target.header.stamp = rospy.Time.now()
         goal.target.header.frame_id = frame_id
@@ -131,19 +166,41 @@ class Node:
         self.point_head_client.send_goal(goal)
 
     def camera_info_callback(self, data):
+        '''
+        Description: resets the current camera info to the stored data
+        Input: self <Object>, data <Object>
+	    Return: None
+    	'''
         self.camera_info = data
 
     def key_callback(self, keypress):
+        '''
+        Description: sends a signal to cancel the current navigation goal
+        Input: self <Object>, keypress <Object>
+	    Return: None
+    	'''
         if keypress.data == "k":
             self.base_client.cancel_goal()
 
     def point_published_callback(self, data, point_id):
+        '''
+        Description: registers a point in the ROS node
+        Input: self <Object>, data <Object>, point_id <Int>
+	    Return: None
+    	'''
         self.points_registered.add(point_id)
         self.published_points[point_id][0] = data.point.x
         self.published_points[point_id][1] = data.point.y
         self.published_points[point_id][2] = data.point.z
 
     def sample_position(self, x_center, y_center, sample_max_radius, sample_min_radius):
+        '''
+        Description: generates a random position within a radius as a goal point
+                    for the robot
+        Input: self <Object>, x_center <Int>, y_center <Int>,
+                sample_max_radius <Int>, sample_min_radius <Int>
+	    Return: generated position <Array>
+    	'''
         min_x = x_center - sample_max_radius
         max_x = x_center - sample_min_radius*math.sin(.1745)
 
@@ -180,22 +237,21 @@ class Node:
 
 
 def euclidian_dist(point_1, point_2):
+    '''
+    Description: establishes the variabes included in the class
+    Input: point_1 <Array>, point_2 <Array>
+    Return: euclidian distance of two points <Float>
+    '''
     return math.sqrt((point_1[0] - point_2[0])**2 + (point_1[1] - point_2[1])**2 + (point_1[2] - point_2[2])**2)
 
 
 def main():
     '''
-        Main - Image capturing method
-        This function captures data on a given object class and instance by having
-        the robot randomly pick a goal and then make a route to that goal to take a
-        a picture of the object.
-        # Arguments
-            class_name: The class name of which object will be getting captured.
-            Used to determine directory to save images to.
-            class_number: The instance number of the object class. Used to
-            determine directory to save images to.
-        # Returns
-            Output: None
+    Description: This function captures data on a given object class and
+                instance by having the robot randomly pick a goal and then
+                make a route to that goal to take a picture of the object.
+    Input: None
+    Return: None
     '''
     # Set up command line arguments
     parser = argparse.ArgumentParser(description='Fetch Data Capture')
