@@ -16,7 +16,7 @@ import sys
 import numpy as np
 import tensorflow as tf
 # Local Imports
-from image_capture.prepare_data import PrepareData
+from data_prep.prepare_data import PrepareData
 
 # Definitions and Constants
 CLASSES = ['book', 'chair', 'mug', 'screwdriver', 'stapler']
