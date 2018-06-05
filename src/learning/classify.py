@@ -17,7 +17,7 @@ from keras.models import model_from_yaml
 from keras.preprocessing import image
 from keras.applications.resnet50 import preprocess_input
 # Local Imports
-from image_capture.prepare_data import PrepareData
+from data_prep.prepare_data import PrepareData
 
 # Definitions and Constants
 IMAGE_HEIGHT = 139

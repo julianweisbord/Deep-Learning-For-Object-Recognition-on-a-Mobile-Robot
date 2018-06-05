@@ -16,7 +16,7 @@ import tensorflow as tf
 
 # Local Imports
 import model as mdl
-from image_capture.prepare_data import PrepareData
+from data_prep.prepare_data import PrepareData
 
 
 SAVED_MODEL_PATH = 'robot-environment-model/.data-00000-of-00001'
