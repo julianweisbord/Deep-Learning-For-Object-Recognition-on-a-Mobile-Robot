@@ -1,0 +1,649 @@
+\documentclass[draftclsnofoot, onecolumn, 10pt, compsoc]{IEEEtran}
+%% Language and font encodings
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[top=0.75in, bottom=0.75in, left=0.75in, right=0.75in]{geometry}
+
+%% Macros
+\newcommand\tab[1][1cm]{\hspace*{#1}}
+
+%% Useful packages
+\usepackage{url}
+\usepackage{pgfgantt}
+\usepackage{comment}
+
+\title{Group 67 - Final Spring Report}
+\author{
+            Deep Sequential Learning for Object Recognition on a Mobile Robot \\
+            Julian Weisbord, Michael Rodriguez, Miles McCall \\
+            Oregon State University \\
+            CS 463 Spring 2018
+		}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+  \begin{center}
+  	The Spring Final Report describes all the work our team has done on our completed project, explaining key features of the software and demoing how each component functions.  
+  \end{center}
+\end{abstract}
+\newpage
+
+\tableofcontents
+\newpage
+
+\section{Introduction to Project}
+For our senior design capstone project, we will build an image classifier on top of an autonomous robot. By leveraging ROS (Robot Operating System)  and the existing mobile robot platform, we can devote all of our resources to sequentially training a Convolutional Neural Network (CNN) with online learning. In this project, we propose a plan of action and several potential solutions to the issues brought about from sequential learning. Additionally, there are multiple environmental variables that must be addressed during training in order to classify everyday objects in a wide variety of settings. To build a robust classifier, we will pursue three different methods to improve on the current system at the Personal Robotics Lab of OSU. These are: designing new data capture methods, overfitting to data in different environmental contexts using multiple classifiers, and testing different online learning models to achieve the best classification rate.
+
+One of the biggest issues Machine Learning as a whole faces is that deep neural networks aren't very amenable to online learning techniques. When new data is passed through the network, weights change via backpropagation and previous "knowledge" is lost. This process is known as Catastrophic Interference and without the ability to sequentially receive and classify new training data, intelligent agents will have to be retrained on the entire data set whenever it is presented with a new input sample to predict.
+
+Dr. Smart of the Personal Robotics Lab is our client, and he created the project as an extension of the ongoing studies being done at the lab. He proposed the project to look deeper into the image classification techniques being used in the lab, and improve upon the methods in place. The work is important as it will lay the foundation for future projects to expand upon our findings in the same manner. We are developing a pipeline designed to be used by other members of the lab, meaning the project has significance to the involved lab members. Our team consists of three members, Michael Rodriguez, Julian Weisbord, and Miles McCall. Each group member handled certain main functions of the pipeline and was responsible for the deliverable portion associated with the functions. Michael focused mainly of data gathering and the scripts associated with it, Julian worked on creating the image classification model and managed the project, and Miles focused on the transitional scripts and auxiliary functions to assist the online learning portion of the classifier. As a client, Dr. Smart attended regular meetings with our group members to keep in touch with our progress and offer insight on issues we ran into. 
+
+\newpage
+
+
+
+\section{Requirements Document}
+  1 \newpage 
+  2 \newpage  
+  3 \newpage 
+  4 \newpage 
+  5 \newpage 
+  6 \newpage 
+  7 \newpage
+  
+  \subsection{Final Gantt Chart}
+      \begin{ganttchart}{1}{27}
+          \gantttitle{Gantt Chart - Task Planning}{27} \\  
+              \gantttitle{Sept}{3}
+              \gantttitle{Oct}{3}
+              \gantttitle{Nov}{3}
+              \gantttitle{Dec}{3}
+              \gantttitle{Jan}{3}
+              \gantttitle{Feb}{3}
+              \gantttitle{March}{3}
+              \gantttitle{April}{3}
+              \gantttitle{May}{3}\\ 
+          \ganttgroup{Prep}{2}{12} \\
+              \ganttbar{Research CNN Algorithms}{4}{12} \\
+          \ganttgroup{Data Collection}{15}{21} \\
+              \ganttbar{Improve Data Collection}{15}{18} \\
+              \ganttbar{Create Image Datasets}{18}{21} \\
+          \ganttgroup{Code Implementation}{10}{25} \\
+              \ganttbar{Implement CNNs \& Classifiers}{10}{22} \\
+              \ganttbar{Implement Online Learning}{14}{25} \\
+          \ganttgroup{Data Processing}{22}{25} \\
+              \ganttbar{Classify Created Datasets with Models}{22}{25} \\
+          \ganttgroup{Analysis}{24}{27} \\
+              \ganttbar{Analyze Output Results}{24}{26} \\
+              \ganttbar{Technical Write Up}{25}{27}
+      \end{ganttchart}
+\newpage 
+
+
+
+
+\section{Design Document}
+	1 \newpage 
+    2 \newpage  
+    3 \newpage 
+    4 \newpage 
+    5 \newpage   
+    6 \newpage 
+    7 \newpage  
+    8 \newpage 
+    9 \newpage 
+    10 \newpage   
+    
+	\subsection{Changes to Design Doc}
+		Our design document required only minor modifications that we had approved by Dr. Smart and McGrath and Kirsten. We removed a term definition that did not end up being included in the final project design. 
+        
+\newpage
+
+\section{Tech Review}
+  \subsection{Michael's Tech Review}
+  	1 \newpage 
+    2 \newpage  
+    3 \newpage 
+    4 \newpage 
+    5 \newpage   
+    
+  \subsection{Miles Tech Review}
+    1 \newpage 
+    2 \newpage  
+    3 \newpage 
+    4 \newpage 
+    5 \newpage 
+      
+  \subsection{Julian's Tech Review}
+    1 \newpage 
+    2 \newpage  
+    3 \newpage 
+    4 \newpage 
+    5 \newpage 
+    6 \newpage 
+  
+
+
+\section{Weekly Blog Posts}
+  \subsection{Michael's Blog Posts}
+  \subsubsection{Fall Term}
+    Week 1 \\
+\indent Met with professor Smart to switch from being on the Ebola project to the robotics object recognition 
+project with Julian Weisbord and Miles McCall. Professor Smart said he would email McGrath before the Tuesday night deadline. \\\\
+  Week 2 \\
+\indent We started discussing how we are planning on building on top of the already existing architecture and one of the main ideas we want to implement is online learning. We will discuss this with Bill Smart at our next meeting with him. \\\\
+  Week 3 \\
+\indent This week we were able to schedule meetings every other week with one of Smarts grad student assistants  named Chris. This meetings will help us get questions answered about ROS and any robot related questions that we may have. Additionally, Chris is going to help us narrow down the scope of our project so we know exactly what is expected of us.  \\\\
+  Week 4 \\
+\indent The meeting we held with Chris on Monday was super helpful in terms of guiding us in the right direction and making sure we are all on the same page. I now have a better understanding of the topics I'm going to need to look into in order to improve the already made object recognition classifier. Chris gave us three main points to focus on for this project which were 1) Overfitting 2)  Improvements to data capturing. 3) Testing Online Learning Models (Different benefits and trade-offs) \\\\
+  Week 5 \\
+\indent This week we were able to get in contact with Chris and get him to send us the code that he has been working on so far for the life long learning of the robot. We're also planning on trying to build our first basic neural network as a team to get a feel for what the code looks like and fully understand how they work. We're going to use the Youtuber named Siraj Raval as a source of guidance to help build our network.\\\\
+  Week 6 \\
+\indent At our group meeting this week we discussed neural networks in depth as a group and started looking into the several different kinds that exist. We decided to look into synthetic gradients by watching a video from  Siraj on YouTube. Now that we have a more solidified understanding of how neural networks work, we're going to try to implement our own next week using TensorFlow. \\\\
+  Week 7 \\
+\indent This week we held our meeting with Chris and Dr. Smart and were able to catch them up on what has been going on in our project in terms of writing assignments like our technology review that's due next week. We were also able to build a simple dog/cat classifier during one of our group meetings to show to behn at our weekly TA meeting. We also researched Convolutional Neural Networks and started looking into MNIST datasets.   \\\\
+  Week 8 \\
+\indent We created our technology review with the help of Chris and Dr. Smart. We also had our weekly TA meeting with behn. We mainly focused on our writing assignments this week during our group meetings. We currently don’t have anything set up specifically to be able to test our network once it's developed, so as an alternative we can use Chris' machine to run our tests. Could check in with EECS for resources to get access to Nvidia servers.  \\\\
+  Week 9 \\
+\indent This week we submitted our final draft for the technology review. We also talked with behn about cancelling our TA meeting this week since most of our group members went home before our scheduled Wednesday meeting. Lastly, we held our group meeting remotely this week and just touched up on some main points that we should address before the end of the term. \\\\
+  Week 10 \\
+\indent This week we turned in the final version of our design document. We also held our weekly TA meeting with behn over the phone and he advised us to try and get access to Pelican servers by emailing McGrath and CC'ing Dr. Smart in the email. Dr. Smart said he approved our message and Kevin laid out some options for us basically saying it can be done. Lastly, we created a rough draft of what the hierarchy of our neural network is going to look like which we will go over with Dr. Smart and Chris at our meeting on Monday.
+  \subsubsection{Winter Term}
+  Week 1 \\
+\indent This week I looked into getting Linux set up on my computer so I can conduct the data capturing process from my computer. From what Chris has told us it seems like I need to install Ubuntu 14.04 since that is what's required to be able to work with the fetch robot. I have downloaded the .ISO image onto a flash drive and will try to install it this weekend when I get a chance to back up my computer just in case anything goes wrong.\\\\
+  Week 2 \\
+\indent This week I tried to install Ubuntu 14.04 and after a tedious amount of work, it didn't end up working. My Mac OS still worked but my computer was acting different and I believe I need to completely reinstall my OS from scratch. My plan for now is to get my Mac OS working normally again and then trying to use a virtual machine to simulate the Linux environment like how I had it at the end of fall term when I was messing around with installing ROS packages and dependencies.\\\\
+  Week 3 \\
+\indent This week I made sure that my Linux virtual machine had the necessary ROS catkin\_ws set up. The next step for me now is to go into the robotics lab and make sure that my computer can connect to bandit without problems. However, we have ran into a minor problem with the fetch. Chris told us that he is having battery issues and is temporally down so we won't be able to use him until he is fixed. We were also able to get weekly meetings on Mondays for about 30 min with Chris and Professor Smart to discuss out progress and issues every week. \\\\
+  Week 4 \\
+\indent This week I was able to do some ROS tutorials on my virtual machine to familiarize myself with how ROS works and better understand how it works with Bandit. Chris told us at our weekly meeting that the fetch is still out of service but they had contacted technical support and are supposed to be fixing it sometime this week when their appointment is. At our meeting we updated Professor Smart on our progress. \\\\
+  Week 5 \\
+\indent This week I accomplished one of goals which was to send Smart our new design doc so that he could approve it. I also went into the robotics lab to do small demo to make sure that everything was working fine on my computer with the fetch. I ran into a problem when running the visualization software as it was too heavy to run on the 4gb of RAM I had allocated for my virtual machine. This means I'm going to have to try to dual boot my computer again with Linux so I have access to my full 8gb of RAM that my computer has.\\\\
+  Week 6 \\
+\indent This week I was successfully able to install Linux 14.04LTS on my Mac by following a more thorough guide than the first time. It was tedious but ended up working in the end! I have installed several ROS packages to mimic the labs computer set up but ended up needing to install more fetch packages as the code for data capturing wasn't working at first. Once I did get it working, I was able to map the room and conduct our first data capturing session! \\\\
+  Week 7 \\
+\indent This week when I went into the HRI room to collect more data, I noticed that my set up had been moved around by a different group. The room wasn't too different but it was annoying to have to replicate my set up all over again by moving their stuff our of the way. This week I was only able to collect 3 data sets because of midterms so next week I'll have to do a lot more to reach my goal of 12. \\\\
+  Week 8 \\
+\indent This week I practically spent my entire time in the HRI room collecting data. I was in there Wednesday, Thursday, and Friday for about 5 hours each day. Some of the days I went in the room was also used by another group that rearranged the room entirely which made the room unrecognizable to Bandit to some extent and made him keep getting lost. To fix this I simply just mapped the room the again so he would have an updated view on what the room looks like. This helped tremendously and made the data capturing process go much more smoothly. \\\\
+  Week 9 \\
+\indent This week I plan on finishing gathering 23/25 total objects and leaving the last two mugs for Julian to do the data collection process on. In my final 8 sets I plan on adding image noise by moving the objects around in between pictures to make our classifier more robust. Other than that, this week was normal like the rest in that we had our weekly meeting with Chris and our weekly TA meeting with Behn. \\\\
+  Week 10 \\
+\indent This week I made a github PR for the code needed to run the data capture. I also worked on the image cropping code to prepare our datasets for training this coming week. I made a PR for this as well and was able to get all my data sets cropped. We held our final meeting with Behn this term. We also had our meeting with Chris and decided that we don’t need to do weekly meetings anymore since it's the end of the term.
+  
+\subsubsection{Spring Term}
+    	Week 1: \\ \indent This week I slowly got back into the grind of things. Did a little bit of work on looking over the data collection file and thought of ways to improve it. We also tried attending our weekly TA meeting with Behn but he wasn't there. He eventually responded and said our meetings start next week. \\
+    	Week 2: \\ \indent Mainly worked on the data collection rewrite this week with Miles. We also held our first TA meeting of the term with Behn and looks like our meetings will be much shorter and more answering questions that we have about upcoming assignments or the class in general. By the end of the week we pushed the data\_collection.py rewrite to our GitHub. \\
+    	Week 3: \\ \indent This week I mainly worked on doing the majority of the PEP8'ing of the code we had on GitHub. We also again held our weekly meeting with Behn where we discussed release forms, the Wired article and he informed us about the change log that we can add to our requirements doc since we are planning on making some modifications to it.  \\
+    	Week 4: \\ \indent This week we submitted our final poster that will be printed and used at the engineering expo. Additionally, I worked on making an HTML web-page from a Wired HTML code skeleton that I got from their website. I finished the Wired article and submitted my work though Canvas. \\
+    	Week 5: \\ \indent This week I primarily focused on working on the midterm progress report and presentation that are due on Sunday May 6th. At this point in our project I feel pretty good about the work we've accomplished and feel like we're ready for expo. In the presentation I included a live video demo of running the data capture live to show off where our project is at this point.  \\
+    	Week 6: \\ \indent This week we had our code freeze. The primary goal of this week was to merge any upstanding PR's and do one last run through to make sure the pep8 standard was being followed throughout. In addition to that, we are planning to meet up with the other teams we will be sharing our expo space with to get a better idea of who is going to have what area of the room and such. \\
+    	Week 7: \\ \indent The big day is finally here, the engineering expo that we've been awaiting since the beginning of the year! This week our main goal was to get a video of bandit conducting the data capturing in a live setting so we communicated with Chris and he helped us learn how to properly and safely transport Bandit around campus so we could take him to Kelley. This served as a trial run and good practice for expo. We recorded a video of bandit doing the data capturing in the Kelley Atrium and made a video to loop through at expo. \\
+    	Week 8: \\ \indent At this point we have just presented our project at the engineering expo. This week I didn't do much and kind of just thought/planned the final things that are going to need to be done in this course to finish up the year.  \\
+    	Week 9: \\ \indent Our primary goal this week was to present Smart the current state of our project. We are trying to figure the best possible time to do so sometime in the next coming week. Did minor touches to our GitHub repo.   \\
+    	Week 10: \\ \indent On the final week of the term Miles and I went into the robotics one last time to get footage of our final code running on bandit. This footage was used in our final presentation and showed everything that we were able to accomplish this year. In addition to that, we briefly went over the final report that is due on Tuesday.   \\        
+  \subsection{Julian's Blog Posts}
+  
+  \subsubsection{Fall Term}
+  Week 1:
+  \\ \indent 
+	Met with Dr. Smart (client)
+Emailed professor McGrath and Dr. Smart with selected project name.
+  Week 2:
+  \\ \indent Created machine learning Wiki for our group to collaborate on different machine learning tutorials and resources that we find.
+ Notes from meeting with Dr. Smart:
+
+-Question: How do you want us to specify an object in a 3d image and how is it different than the way that Chris has done it? Answer: Look into Grabcut algorithm, Convex Hull in 3-space, robot will look at object from different angles, robot and object must be in same coordinate frame. How do we keep the object in frame? Could add an object to the plane of view that we know the coordinates for so therefor we will know where both of them are with respect to eachother in camera view. Right now they use AR tags(very thin hard to see with different angles)
+
+-train a deep network to recognize the object. Can explore other times of machine learning, look into different deep network arhitectures. Specialization on one particular object may be easier than recognizing all objects in a class (cup example). Setup is that this robot will be in your environment for a long time and learn your stuff over time.
+	
+Note: Focus on deep learning, have Chris show us how to walk around with the robot
+	
+-Question: What are the desired outcomes, how will we know when we have solved your problem? Answer: Pick a set of objects and say that we want to recognize those with a high accuracy, make sure classifier is competitive. Analyze does tight cropping matter, does good localization matter.
+	
+How robust is the classification, can it recognize the object if it is moved if there is something in the way? How clean does the training data have to be (tight cropping is important)? Fitting depth images
+	
+Lifelong learning: The object will look different depending on the time. Create a dataset at one time of day, then add another training set at another time and try to combine them.
+
+Summary: 
+We started discussing how we are planning on building on top of the already existing architecture and one of the main ideas we want to implement is online learning. We will discuss this with Bill Smart at our next meeting with him. 
+
+Week 3:
+\\ \indent For the first half of the week, I emailed the client to clarify some project details. I also worked to revise the  project problem statement. During the second half of the week, I spoke with a grad student named Chris about the project and sent the problem statement to both him and Dr. Smart for review. On Wednesday we met with our TA who was very informative. Today I will be preparing the final draft of our problem statement and adding it to github.
+
+Week 4:
+\\ \indent Meeting with Chris Eriksen. Overfitting to data in different environmental contexts (use different classifiers) 
+Improvements to data capturing. Testing different online learning models and seeing benefits of each other
+Decided on objects (same n objects throughout whole project). This week we focused on narrowing down specific project goals. Our rough draft was pretty vague but we met with a doctoral student in the College of Robotics and decided to divide the project into 2 or 3 categories. They are: 1. Overfitting to data in different environmental contexts, 2. Testing different online learning models and seeing benefits of each, and 3. Improvements to data capturing.
+
+Week 5:
+\\ \indent Wednesday meeting with TA:
+
+- Send emails to TA when I update meeting notes
+- Talking about requirements document
+- Need to meet with Kirsten to speak about problem statement
+	
+Goal: Write and submit requirements document rough draft
+
+Week 6:
+
+	Requirements meeting with Dr. Smart and Chris Eriksen:
+Work Plan: Overfitting to data in different environmental contexts (use different classifiers) 
+-Testing different online learning models and seeing benefits of each other.
+Questions:
+    a. Who is the ideal user (maybe a research lab?)
+    i. Yes research lab that learns its environment really well and can use that knowledge.
+	TODO:
+		1. Decide on 3-5 object classes for classification
+		2. Continue Researching Convolutional Neural Networks
+		3. Look at different sequential learning techniques
+	
+Going to have a more technical meeting November 7th. This week we met with a grad student named Chris who works under Dr. Smart and updated him on what has been going on in our project. We also spent a lot of time working on our requirements document and finished it on Friday. This weekend, we established several rules for how our group meets and we all have a better understanding of each others individual goals. We are meeting Mondays, Wednesdays, and some Fridays.
+
+Week 7:
+
+	Researching convolutional neural networks and working on building a simple program to show our TA. Looking at common datasets for ML such as the MNIST dataset. Met with Chris:
+	- Talked about ROS
+	- Chris showed us how the robot will navigate the environment by itself to find the goal image
+	- Look into rviz
+Research different marker ideas for data capturing
+Requirements:
+	-Need to make our 3 requirements more detailed, talk about what we will implement and research
+	- Talk about what Chris mentioned for robot movement and image capturing
+Having some trouble understanding what a requirement should be, maybe we should speak to Kirsten a bit
+
+Week 8:
+\\ \indent TA Meeting:
+	- Add picture to biography and resend link to Ben
+	- Talked about weekly summaries
+	- Asked Ben about Technology Review
+	- Asked questions about Requirements Document (Fix requirements, and high level documentation)
+Smart Goals:
+	- Finish Requirements Document
+	- Continue to work on Technology Review and finish rough draft.
+	
+Summary:
+	This week, we created our technology review document rough draft and had a meeting with Chris and Dr. Smart. At this meeting, we received help on our Technology Review.
+
+Week 9:
+\\ \indent No Class. We created and turned in the final version of our Technology Review
+
+Week 10:
+
+Smart Goals:
+	Two assignments due by the end of the term: 
+		1. Progress Report
+		2. Preliminary Design Document
+		3. According to our Gant Chart from the Requirements Document, we as a group should be well versed in Convolutional Neural Network Design.
+		4. We need to design the hierarchy of our Neural Networks
+		 
+
+Meeting with Ben:
+	-Technology Review
+	-What are we doing over break: Lots of research, possibly data capturing
+	-Due dates for Design Document, Final Progress Report(powerpoint, video, written doc)
+This week we had a phone meeting with Ben and talked about what we were going to do in this class over break. We also wrote and turned in our design document. This was a difficult assignment because it required a very large amount of research on my part. We also have a rough idea of our neural network hierarchy but need to go over the plan with Dr. Smart
+
+
+
+
+
+  \subsubsection{Winter Term}
+  
+Week 1:
+\\ \indent Spent a lot of time researching Convolutional Neural Networks and image recognition topics. This took at least 25 hours. I implemented several practice convolutional neural nets in both Tensorflow and Keras.
+
+Week 2:
+\\ \indent This week I continued to learn about convolutional networks. I also looked into other resources such as the YOLOv2 Object Recognition algorithm. Also made a template for our github file and python module structure. At this time, I researched very specific details about image classification such as the challenges with an image dataset.
+Week 3:
+\\ \indent Made our Week 3 and 4 Plan 1/24/18 to 2/3/18
+
+Michael and Miles Goals:
+		a. Data collection: Make sure you know how to operate/control the PR2, schedule some time Monday (1/29) with Chris ASAP to Learn how to interact with the PR2 using ROS multiple machines http://wiki.ros.org/ROS/Tutorials/MultipleMachines Michael and Miles together should be able to reproduce the process of logging on to the robot, mapping the room, making object point cloud, creating visualization and sending it to a file.
+		b. Michael must be very knowledgeable about ROS and the data collection process by the end of this time frame. 
+		c. data\_collect.py: This will be used for data collection shortly, completely understand Chris's data collection module and play around with it.
+		d. Miles: get the Movidius sticks functionally working and do some research about them
+	
+Julian
+	• Goals:
+		a. Continue working on inference, loss, and training of model
+		b. Take Chris's data and start using it on model
+		c. Oversee and help with Michael and Miles' tasks
+		d. Look into final CNN Architecture
+		e. Take image data and start making it into a Tensorflow or Keras dataset
+
+Everybody
+	Goals:
+		a. Are we going to use software cropping, rfid's, circle dots, etc.
+		b. Gather objects that we will collect data on (chair, pen, books, mugs, stapler)
+
+Week 4:
+\\ \indent Client Meeting:
+Told Chris and Dr. Smart about week 3/4/5/6 goals. Updated him and Dr. Smart about our progress.
+Dr. Smart added me to  the HRI Room Calendar and the Fetch Calendar. He also added me to the Fetch robot calendar
+which eliminated a lot of our scheduling bottlenecks.
+Week 5:
+\\ \indent Created Week 5/6 Team Goals:
+	Miles:
+		-Mentor Julian and help him learn the data collection process (Due Week 5) (Done 02/06/18).
+		-run a CNN on the Movidius sticks (Due Week 5) LATE.
+		-Research CNN's,  determine the opportunity cost of using Movidius vs. asking McGrath for GPU's (Ask Ben for card/SSH into Chris' desktop) (Partially Complete 02/18/18).
+		-Remove unusable data from image datasets that were scraped by Julian  (Done 02/19/18).
+		-Week 3/4 Overflow: Install Movidius drivers  (Scrapped Movidius).
+		-Week 3/4 Overflow: Save rviz visualiztion to a file.  (Done 02/06/18).
+		
+	Michael:
+		-Send Dr. Smart our design doc to be approved and follow up (Done).
+		-Collect data on Fetch (Have at least 3 good sets of images by end of week 6 (Done 02/18/18).
+		-Week 3/4 Overflow: Recreate and understand the data localization (Done).
+		Week 3/4 Overflow: Michael Understand data collection python module, play around with, and run on the the Fetch  (Done).
+	Julian:
+		-Make CNN Model code pretty (Done 02/13/18)
+		-Scrape data for our objects from internet and send to Miles (Done 02/10/18).
+		-Finish prepare\_data module (Due Week 5) (Done 02/11/18).
+		-Experiment with different parameters of CNN, it should be training on scraped and practice data, create PR for everyone to review (Partially Complete 02/18/18).
+		-Continue researching Sequential Learning Architectures (Done 02/18/18).
+		-Research Synthetic Gradients Backpropagation LATE.
+		-Research Resnet Inception and Tensorflow alternatives  (Done 02/18/18).
+		-Try to install Movidius drivers if Miles doesn't have it working by Sunday (Reassess whether Movidius is worth it) (Done 02/13/18).
+		
+	Everybody:
+		-Gather any missing objects (Close Enough 02/14/18).
+		-Review and approve/deny any and all PR's (Done).
+		-Make Poster (Due 02/14/18) (Done 02/14/18).
+		-Make video (Due 02/16/18) (Done 02/16/18).
+		-Do report (Due 02/16/18) (Done 02/16/18).
+
+Week 6:
+\\ \indent Worked on Residual Neural Network implementation and other things that carried over from week 5.
+Week 7:
+\\ \indent Week 7/8 Goals:
+	Miles:
+		-Learning about CNN Architectures LATE
+		-Add caching to prepare\_data.py, create PR and have it approved by end of Week 8 LATE.
+		-Create Novel Image python file (This file takes a new set of images and prepares them), create PR and have it approved by end of Week 8 LATE.
+		-Collaborate with Julian on Classify.py (Inference,  runs new data on our model) LATE.
+		-Make the changes that Dr. Smart wants to our design doc (Done 03/01/18).
+		-Ask McGrath for GPU's and/or ask Ben for card/SSH into Chris' desktop (Done 03/01/18).
+		
+	Michael:
+		-Collect more data (8 datasets) on 5 different objects, add image noise, introduce varying object placement (Partially Complete).
+		-Look into ways to improve data collection (Done)
+		-Figure out how to do image cropping, is there a better way? How can we ensure that the whole object is within the cropped image? LATE.
+		-Minor modifications to data\_collection.py for modularity (Done).
+		-Create a Github PR that includes all files related to data collection and have it approved LATE.
+		
+	Julian:
+		-Create Github PR for CNN Model (Done 02/26/18).
+		-Continue researching Sequential Learning Architectures and determine the best algorithm or make up your own (Done 03/03/18).
+		-Implement ResNet Inception and compare to the CNN model that I already have (Partially Complete).
+		-Continue researching Synthetic Gradients Backpropagation to apply to our pipeline LATE.
+		-Decide to scrap or use Movidius (Done, will scrap).
+		-Collect data on fetch (Michael assists) (2 datasets) LATE.
+		-Create Classify.py (File runs new data on our model) (Done 02/26/18).
+		-Talk to Dr. Smart about having the robot at the Expo LATE.
+
+Week 8:
+\\ \indent No Client Meeting this week. Continue working on tasks from week 7.
+Week 9:
+\\ \indent Created week 9/10 Goals:
+
+Julian:
+	
+	-Talk to Dr. Smart about having the robot at the Expo (Done 3/13/18).
+	-Compare ResNet Inception to the CNN model that I already have (Done 3/13/18).
+	-Have PR approved with ResNet Inception (Done 3/18/18)
+	-Implement Sequential Learning Algorithm into our pipeline and make a PR. (Getting There).
+	-Add Tensorboard to our models (Done 3/18/18).
+	
+Miles:
+	-Add caching to prepare\_data.py, create PR and have it approved by end of Week 8 LATE.
+	-Create Novel Image python file (This file takes a new set of images and prepares them), create PR and have it approved by end of Week 8 LATE.
+	-Collect data on fetch (Michael assists) (2 datasets) (Did 4).
+	-Start implementing Synthetic Gradients LATE.
+	-Ask Chris for GPU and set up ssh (Done).
+	-Design Document. 
+
+Michael:
+	-Figure out how to do image cropping, is there a better way? How can we ensure that the whole object is within the cropped image? (Done 3/18/18).
+	-Create a Github PR that includes all files related to data collection and have it approved  (Done).
+	-Add image noise to data, introduce varying object placement (Done).
+	-Collect 8 sets of image data (Done).
+
+Week 10:
+\\ \indent On 03/07/18, I attended a tech talk at Oregon State University given by Eric Eaton, a faculty member at Penn State. Eric specializes in Sequential Lifelong learning which is also one of the key aspects of our project. https://www.seas.upenn.edu/~eeaton/
+
+Worked on Elastic Weight Consolidation Implementation, there are more details on my One Note under Week 10.2
+  
+  \subsubsection{Spring Term}
+  Week 1: 
+  Created Week 1 Goals-
+
+  Julian:
+  -Continue Implementing EWC Learning Algorithm into our pipeline (Done)
+  -Document issues in repository and make progress towards fixing them
+  -Switch object classes to correct ones (Done)
+  -PEP8 Files that you have added to our repository and make a PR (Done)
+
+  Miles:
+  -Add caching to prepare\_data.py, create PR and have it approved by end of Week 8 LATE
+  -Create Novel Image python file (This file takes a new set of images and prepares them), create PR and have it approved by end of Week 8 LATE
+  -Start implementing Synthetic Gradients LATE
+  -Have Design Document Approved and send to McGrath et al LATE
+  -PEP8 Files that you have added to our repository and make a PR LATE
+
+  Michael:
+  -PEP8 Files that you have added to our repository, merge existing PRs, and make a PR LATE
+  -Major rewrite of data\_collection.py, make sure it runs correctly w/ the Fetch (Miles to assist) LATE
+  \\ \indent Created Week 2 Goals:
+
+  Julian:
+  -Make a PR for EWC Learning Algorithm LATE
+  -Repository should be pretty clean, modular, etc.
+  -Merge any PEP8 PRs (Done)
+  -Try to remove layers from ResNet Inception LATE
+  -Continue work on system that compares the results of Sequential Learning vs no sequential learning. (Done)
+
+  Miles:
+  -Determine if Synthetic Gradients is a good idea and make a PR if necessary LATE
+  -Have Design Document Approved 
+  -PEP8 Files that you have added to our repository and make a PR LATE
+  -Merge any PEP8 PRs LATE
+
+  Michael:
+  -Finish rewrite of data\_collection.py and have it merged into master LATE
+  -Merge any PEP8 PRs LATE
+
+
+Week 2:
+
+  Week 3/4 Goals:
+  Julian:
+  -Make a PR for EWC Learning Algorithm 
+  -Try to remove layers from ResNet Inception
+  -Continue work on system that compares the results of Sequential Learning    	 vs no sequential learning.
+
+  Worked on Elastic Weight Consolidation implementation into pipeline. This has been a difficult process, I have looked at other implementations on Github but they seem to be computing the Fischer Diagonal differently than the paper on Elastic Weight Consolidation
+
+
+
+Week 3:
+
+  TA Meeting:
+  -Get down logistics for Expo
+  -We need to write a research paper for Dr. Smart
+  -behn said that we can pretty much work on our project code up until Expo.
+
+  More work on Elastic Weight Consolidation, I may just have to implement the novel\_image.py and classify.py by myself because they are necessary for testing sequential learning functionality.
+
+
+Week 4:
+
+  Created better visualizations of the training process using Tensorboard
+
+
+Week 5:
+
+  What I have done this term so far:
+  •	Work on adding sequential learning
+  •	Added and cropped new set of images to our training and testing sets
+  •	Made a better visualization of training process using Tensorboard
+  •	Adding novel image preparation to our existing prepare\_data.py
+  •	Working on Classify.py, which is the inference file.
+  •	Team management
+  •	Updated both neural networks with small changes, tuned some parameters
+  •	Starting documenting how parameters effect the training process
+
+
+Week 6
+
+  Meet w/ other groups 4pm on Tuesday in room 1005:
+  -Need outlet
+
+  KEC Data Visualization
+  -Check out the robot
+  -table
+  -An object
+  -Put robot in case and walk it or drive it in a car
+  -scope out KEC tomorrow at 5pm to see how busy it is
+  -Email Chris to show us how to move the robot and ask him to help on Tuesday or Wed at 4:30ish
+
+  -text Nick, Tyler, Natalie, and others to come see our robot
+  -Email the robotics department about coming to see bandit
+
+Week 7
+
+  Preparing for expo,
+  Brought Fetch robot to KEC to film a video that will be played on the monitor during expo. Talked to Dr. Smart and Chris Eriksen about how to transport the Fetch robot.
+  Expo went well.
+
+Week 8
+
+  Continued work on Elastic Weight Consolidation part of project. 
+
+Week 9
+
+  Presented current state of project to Dr. Smart
+
+  Our team worked on the Spring Progress Report and presentation
+
+Week 10
+
+  Work on finalizing project, research paper, and final report
+
+
+  \subsection{Miles' Blog Posts}
+  	\subsubsection{Fall Term}
+    	Week 1: \\ \indent In these first few weeks we are getting accustomed to the class lay out and investigating all the projects we would be interested in. My goal is to decide on a topic or issue I want to pursue for the year and look for projects that match that. \\
+    	Week 2: \\ \indent After looking into the different available projects last week we started voting on which options we would like to participate in. I am hoping to get a project involving machine learning in some fashion, and there are a few projects like Dr. Smarts mobile robot that stick out that I chose. I submitted my top choices all with machine learning and will be settled by next week.\\
+    	Week 3: \\ \indent This week our teams were finalized and we had our first meeting to get connected and in contact with each other. We discussed the project as a whole and how we might each wish to contribute, and went through some initial set up steps like making a GitHub repository. We've set up meetings with Dr. Smart and his grad student Chris Eriksen to keep in touch on a regular basis. \\
+    	Week 4: \\ \indent This week we started narrowing down the scope of our project and defining the issues we'd like to address in the project. After meeting with Chris we discussed overfitting, data capture, and online learning, and how Dr. Smart wishes to have these aspects worked into the project. \\
+    	Week 5: \\ \indent Our team meetings have been helpful establishing how we will distribute the responsibilities and tasks for the project. As a group we've been researching machine learning and neural networks, and have found intuitive video tutorials and scholarly articles. Chris also introduced us to the data gathering files he already has in place for the Fetch bot and shared all relevant code he has with us. \\
+    	Week 6: \\ \indent This week I worked on adding sources to our annotated bibliography regarding neural networks and image classification. Our group has been unclear on how to make our project research oriented and the special lecture on research projects was very helpful for my understanding of how our project differs from those with more of a deliverable product. Kirsten laid out what we should be looking for in scholarly articles and how to connect them to our project. \\
+    	Week 7: \\ \indent This week our meeting with Dr. Smart and Chris was helpful for me, sharing our current research status with them and getting useful feedback and guidance. The tutorials and articles I've been looking into are good sources for the Technology Review coming up and with these new insights I should be able to complete my part easily. My tech review is focusing on the main components of the classification model, so I'm writing on neural networks and how we might use different technologies to our advantage. \\
+    	Week 8: \\ \indent I finalized the tech review and we got the ideas approved by Dr. Smart in our meeting this week. Most of the week was spent individually and as a group putting these documents together, but we also continued to try to establish a good processing platform to test our neural network on. My desktop has an Nvidia 560ti for a GPU and Julian has a newer card, but we may end up SSH'ing into Chris' workstation in the lab to utilize an even stronger card. So far the remote access to shared resources hasn't been successful, but we will continue to investigate while we use local machines. \\
+    	Week 9: \\ \indent This week covered a lot of organization and preparation for our group. We all submitted our tech reviews and made plans for a work schedule over the break. While we do not need to work too much over the break, we want to be set up to get a fast start winter term.  Behn gave us good insight on how to finish the term strong and prepare for the break like we were wanting. \\
+    	Week 10: \\ \indent This week finalizes our term and we submitted two key documents, the design document and final progress report. We started the week with a decent draft of the design document which lays out our plans to complete our project, and the progress report summarizes the second half of fall term. I had issues with video capture and screen recording, but luckily fixed them before we had to submit the report. We also reached out to McGrath and Dr. Smart to inquire about GPU server access, as we want to have a processing machine in place over the break.
+        
+    \subsubsection{Winter Term}
+    	Week 1: \\ \indent This week I looked into the data gathering code and begin the environment set up process on my laptop. I am collaborating with Michael to complete data gathering, and while it is mainly his responsibility I want to be able to replicate his results on my machine. My laptop is old and underpowered, however, so certain tools designed for ROS like Rviz don't run very well or at all. Luckily my laptop was already running Ubuntu, so I simply reset the version of the OS to 14.04 (required for the Fetch's set up of ROS) and installed all requirements in a virtual environment. \\
+    	Week 2: \\ \indent While waiting for Michael to have time to finish his set up and compare to my own, I spent this week looking into all GPU resources available to us and how we may be able to run our project with them. There are many ways for us to process our data, each with advantages and disadvantages, and we are trying to decide as a group the best solutions. Ideally we will use a local machine with a strong enough GPU to avoid scheduling time on a shared server resource. \\
+    	Week 3: \\ \indent This week we got more set up in the robotics lab and experiment room we will be using for the rest of the data gathering steps.  We had a meeting with Chris where he demonstrated the full data gathering process and all programs that must be ran to do so. Our goal is to reproduce this process without help or supervision so we can quickly collect images. Unfortunately the Fetch robot needs a new battery and is currently out of service while we are trying to get all this set up. I also picked up Intel Movidius Computing sticks from McGrath, which may be an interesting resource for running the model on. \\
+    	Week 4: \\ \indent I faced some speed bumps and delays this week, but did my best to push through these issues the best I can. The fetch bot is still out of commission while the battery is replaced and the Movidius sticks McGrath gave us have been difficult to get running properly on my machine. I was hoping the installation of their software would be straightforward, but I may need more time than I was anticipating to get them stable on my laptop. I am also helping Michael with his ROS tutorials and Linux troubleshooting. \\
+    	Week 5: \\ \indent This week Michael and I were able to work more with ROS and the Fetch bot. Our goals were to save the floor mapping generated by the radar scanner to a file and finish putting together our collection of objects we will use to classify. I spent time catching Julian up to speed on the data gathering process, but we will need more time to master ROS and the visualization tools. \\
+    	Week 6: \\ \indent This week I was able to focus on evaluating the value the Movidius sticks have bring to our project. Because of the difficulty I've had implementing them successfully on my machine we want to research the cost-benefit analysis  of the technology before pursuing them further. We want the full pipeline to be easily replicated on many environments, and specific hardware like the sticks need to be worth including in the project for this reason. I spent time cleaning Julian's scraped data sets as well for training the classifier. Images were automatically pulled from the internet and I went through the results to remove any images that didn't align with the object classes we wanted in the training data set. \\
+    	Week 7: \\ \indent This week I revised the design document to match our updated understanding of the different technologies in our project and any design decisions we've changed since the document was created. I collaborated with Julian to get caught up on his progress with the convolutional neural network implementation, and I need to spend more time learning about the software he is currently using. In our weekly meeting with Behn we discussed speeding up the data gathering process and ways we might improve the image quality of the Fetch bot. \\
+    	Week 8: \\ \indent This week I helped Michael finish our initial data capturing efforts. This was a significant goal of ours, as we now have a "rough draft" of all of our results and can train the classifier on a data set we are happy with. I began work on adding specialized programs to Julian's classification model, a script to handle new input data and a way to cache our data set state for future reference. I struggled with Tensorflow compatibility on my laptop, but these issues shouldn’t be present on the machines we are actually using to test the classification model on. \\
+    	Week 9: \\ \indent I spent the week back in the robotics lab, revising the data capture code and setting up the environment again on my laptop. I wasn't paying attention and updated the OS past 14.04 and had to revert my installation to communicate properly with the Fetch again. After completing the initial data set with Michael, I am working on our auxiliary data set that will be used more so for image prediction instead of model training. I also met with McGrath and picked up an Nvidia 980 which we can use in any of our machines for the duration of the class. \\
+    	Week 10: \\ \indent This week I completed my auxiliary data set collection, which was another goal I was really hoping to have done by the end of winter term.  I cleared out the experiment room of all our set up material, and unless we decide we need more data in spring term we don't need to revisit data collection at this point. As a group we met with Chris and set up a calendar to share access to his lab workstation as an extra GPU resource. We also completed our final progress report for the term and met to discuss our break plans to start spring term on the right track. \\
+        
+  	\subsubsection{Spring Term}
+    	Week 1: \\ \indent We met with Behn this week to get back in touch and plan our path to the expo. We double checked our registration status for the expo with McGrath and looked into getting our poster printed. I spent the week reviewing our design document a final time for discrepancies between our understanding of the project with Dr. Smart and what our document was representing and created a change log for the document outlining the changes we made. \\
+    	Week 2: \\ \indent Our group still has some confusion about upcoming requirements, but our meeting with Behn clarified most of these issues. Our expo poster, release forms, and WIRED articles are due soon, and we discussed what our user manual and research deliverable are going to look like. I spent the week finalizing our design document and requirements document, and submitted pull requests for both. \\
+    	Week 3: \\ \indent This week I laid out the full skeleton of my WIRED article and met with Omeed and his group to trade presentations. We presented our project to their group and answered any questions they had, then we asked them about their "I Heart Corvallis" app. I struggled to decide how I wanted to format my article, but I am happy with how my layout compares to actual WIRED article reviews. \\
+    	Week 4: \\ \indent This week our meeting with Behn helped explain more questions we've had about finishing our project.  We won't have a meeting next week, but got good information on how to make our code commenting more readable and translate our notes into a user manual. We submitted our WIRED articles, and our midterm progress report is due next week which we ran through in a group meeting. \\
+    	Week 5: \\ \indent This is the week before the expo, and we've been ensuring our presentation is ready. We've been running the model to gather additional results, and have added these new values to the poster. Michael and I met with the other groups that will be staged in the same room as us for the expo, and decided on how we all wanted to organize the room. \\
+    	Week 6: \\ \indent This week was Expo week! The rest of the week was spent preparing for Friday. We filmed a video to play during our presentation, and our group met to go over key discussion points that might arise during the expo. The event itself went over smoothly and we answered all questions brought up by a variety of audience members. \\
+    	Week 7: \\ \indent This week was our code freeze, meaning we had to have all functions in our pipeline implemented completely with bugs resolved. Our group met to address the important outstanding branches open in our repository. After the freeze we'll still be able to update our documents and documentation, but all functional programs must be left alone. I spent most of my attention finishing the additional online learning functions, and made sure the code was compatible with Julian's final versions. \\
+    	Week 8: \\ \indent This week I focused on creating our research paper. I looked into different IEEE formats for scientific journals, and used the research lecture from earlier in the year as a reference. I created a skeleton for the document, but need more time to finish writing the body of the essay. \\
+    	Week 9: \\ \indent We are moving into the final stages of our project, and capstone as a whole, and this week and the next are dedicated wrapping up any loose ends for our project. I am working on our research paper to include in our final report, and we filmed and submitted our final presentation. Our group is also working on compiling the final version of our user manual from our combined notes. I stopped by McGrath's office to return all remaining equipment we borrowed this term. \\
+    	Week 10: \\ \indent This week our group has been merging our remaining Github branches to finish our repository. We compiled our final report early this week, and handed our project over to Dr. Smart for a final evaluation. \\
+
+
+
+
+\newpage
+
+\section{Final Poster}
+	1 \newpage
+    
+\newpage
+
+\section{Research Document}
+	1 \newpage
+    2 \newpage
+    3 \newpage
+	4 \newpage
+	5 \newpage
+	6 \newpage
+
+
+\section{Project Documentation}
+\subsection{Data Capturing}
+	So the very first thing that I had to do was install Linux using Ubuntu 14.04 LTS. The reason for this is that the intelligent agent (also known as Bandit) is essentially a Linux computer and also all the ROS code that is required needs Linux to function properly. Once Linux is installed, the first thing you want to do is install terminator which is another form of terminal that makes it easy to work with multiple terminal windows as ROS requires you to use several at one time just to get the data capturing to work. Once terminator is installed, you should immediately changed your local machines .bashrc file to includes the ROS Master URI and Port of Bandit. Once this is done, you need to set up your catkin workspace with a simple install command from the ROS tutorial website. Next, you need to add the necessary dependencies for Bandit by searching for packages that are missing. Once you have these packages you can start mapping the room that you will be collecting data in and once you have that map, update the launch file to use that map with RVIZ and you’re all set to run the data capture. Now all you have to do is launch the launch file and then then once RVIZ is loaded up, you should plot 4 points in 3D space around the object so that the data capturing code knows where the object is to collect the data from. Now simply just run the data capture and bandit will take care of the rest.
+    
+So now that we know all the steps necessary to get to the data capturing portion of the project, lets talk about the method that bandit uses to collect data. He first starts out by generating a random goal in the room that fits under the criteria of the minimum and maximum radius from the object. Once this goal is determined, bandit determines a random route to take to get to this goal by maneuvering around the room without running into any objects. If he isn’t able to make it to the goal on his first attempt, he will stop and generate a new random route in an attempt to reach that goal again. This process will repeat until the reaches that goal. Once he makes it to the goal, he will adjust his spine by a random amount to get different height angles of the object. After adjusting his spine, he will zero in on the object and center himself with it. At this point he will quickly sleep for 3 seconds and then take a picture. The reason for sleeping for 3 seconds is so that the pictures don’t come out blurry and it gives me a small time frame in which I can add image noise. This process will repeat for x amount of pictures that are going to be gathered during that data capturing session. 
+	
+    \newpage
+	\subsection{User Guide}
+    	1 \newpage
+        2 \newpage
+        3 \newpage
+    
+
+
+\section{Recommended Technical Resources for Learning More}
+  Youtube is a great online resource for visual explanations of many of the technologies we researched throughout the project. Videos posted to the site offer a wide range of expertise levels, and can often demonstrate a complex idea easier than reading a related scientific journal. It is important to verify this information, however, as it isn't peer reviewed the same manner journals are.   
+  Chris Eriksen is Dr. Smart's graduate student currently working the Personal Robotics Lab, and acted as another mentor for our group throughout the year. He attended our weekly client meetings and offered advice on each step of the project. He shared code, research, and hardware resources with our team and helped provide access to necessary connections. 
+
+
+\section{Conclusions and Reflections}
+  \subsection{Michael's Reflection}
+Over the course of the entire year, I've learned so much over robotics with ROS and machine learning in general. Prior to engaging in this project, I had very minimal (basically nonexistent) knowledge of both of these topics. This project on its own is so complex with the AI deep learning algorithms, data capturing algorithm, and complexity of the neural networks that we researched. To me it is still surreal to think that the neural networks we were working with are mathematical models inspired by the biological brain that function in a similar matter in that it allows a network to learn within its environment over time with a web of interconnected neurons. And seeing it come to life essentially and start making its own decisions as to whether the items we were feeding through the net were staplers, chairs, screwdrivers, mugs or books. \\
+One of the biggest non-technical takeaways that I got from working on this year long project is the experience of working with colleagues of mine on the same project for such an extended period of time. We had our ups and downs as teams but ultimately came out on top and we couldn't have done it without each of us being committed to our Senior Capstone. In addition to this, I believe the pitch we practiced for expo was a good experience as we got to try that out in person with people of all levels of competence. It was great being able to share with others our project and explain to them this new technology that is paving the future of machine learning. \\
+This project has gave me valuable experience with project work. This was a whole new level of commitment, work, planning, and research that seems to more closely simulate what our jobs will be like as professionals. Dealing with the GitHub repository and making sure that our repository was kept organized and well structured was slightly more challenging than I imagined since I'm used to smaller projects where I can just throw everything into a "src" folder with a makefile and call it good. \\
+This project has also taught me that project management is an essential component to team success. You could have the best programmers in the world working together but without adequate project management, that team will likely fail or take a lot longer than necessary to finish a project. I am grateful for Julian stepping into that role to guide us on this machine learning adventure and help keep us on track by ensuring we knew what things we were being held responsible for in order to have a successful end product. \\
+Working in teams for this project has definitely given me the best feel for what it will be like in industry to work with other coworkers on projects together. We were regularly collaborating and reaching out to one another when we needed something such as a particular piece of code or explaining how something worked. I've also learned that working with your friends on the same team can be challenging because sometimes its hard to draw that line between being casual with one another and having to be professional for certain parts. This likely wouldn't have been an issue if I didn't know my team members since I would've been more to the point about getting the project done and not lolly-gagging around as much since we were comfortable with each other. \\
+If I could do this project over again, I would try to not be as ambitious as to the amount of work we could accomplish on a project that involved complex methodologies that over half the team wasn't familiar with or had any experience with. Instead, we should have had more stretch goals that could've totally been doable but would've also allowed us to get a fully functioning software pipeline working first before trying to add on fancy new methods for machine learning. I mean I spent over half my time learning ROS and figuring out robotics things that I wasn't familiar with which was essential to us being able to collect data to feed into our network. I also would've enjoyed this project a second time around if we didn't have to do all the documentation that is required for this class as that would've freed up more time to spend on the project.
+  \subsection{Julian's Reflection}
+  I have learned so many new technical skills from this project which crossed several disciplines. I learned about robotics and how to develop on top of the ROS platform, I also walked away with tons of new skills in data preparation, machine learning, and data visualization. I spent most of my time on the machine learning side of the project and it is partly because of those responsibilities that I was able to acquire multiple job offers in the field of machine learning. I learned how to implement neural networks in Tensorflow and Keras and used several machine learning topics such as: Transfer Learning, Hyperparameter Tuning, Online Learning, and Data Preparation and Sampling. 
+	In addition to many technical skills I also learned many non-technical skills. By communicating my ideas to peers and the client, my public speaking and presenting skills improved tremendously. I also learned about LaTex, making video presentations, and writing papers with IEEE formatting. From this project, I have learned that group work can be challenging, you get many new perspectives and great ideas that you wouldn't have thought of through group discussion. However there is an added time sink that occurs when you have to convince your teammates that things should be done a certain way or have to explain a process instead of just implementing it right away.
+    I have definitely learned a lot about project management. Most importantly, the way I like to be managed and the things that incentivize me to do my best work, may not be applicable to everyone else. As a manager you need to find out how your employees and team members work best and help make that a reality. Additionally, I learned to delegate work and determine who would be best for what portion of the project. Working in a team means cooperating with other team members, I have learned to be sensitive to other team members schedules and current workload when delegating work and when asking questions. It is also important to note that you can't just assign all the work that no one wants to do to yourself because this will likely be too much work.
+    Finally, if I could do the whole project over,
+
+  \subsection{Miles' Reflection}
+  We covered so much material over the past three terms, it's important to pause and record your findings so you can look back on them. While I did keep my weekly blog updates, these only looked at that small scale, and it can be nice to reflect on the entire year as a whole as a conclusion to the document and the project. 
+  Our project was quite technical, and involved complex software algorithms and technologies. Over the course of the year I've learned much about AI and robotics from a broad point of view, and the experience with the Fetch and ROS programs is valuable going forward as more tools in my arsenal. I also realized how little I knew about the machine learning algorithms I'm familiar with, and working on our classification program forced me to research these technologies. These areas had largely been a "black box" to me, but learning about each layer made the concepts as a whole easier to grasp, and allowed me to provide more valuable feedback to my teammates.   
+    Besides studying the technologies we included in our project, capstone has been great practice for my more meta career skills as well. From software version control and project management, to team communication, client interactions, and mock interviews, these non technical skills will help me in my computer science career. 
+    While I have worked on long term projects before, I have never played such a large role in an endeavor this big before. Term long projects do not require the same level of organization and coordination between group members that capstone does. And not only is our final product a functional software pipeline, the coding standards are much stricter to maintain a cohesive repository and one that will be references by others in the future. It is extremely important to plan out the implementation of features for the overarching project, and dividing tasks intelligently and fairly is a skill on its own. 
+   In a team with only three members, each of us had to work on completing tasks and managing the work flow. I'm grateful for the tools and software we utilized outside of coding; OneNote made organizing content between each other and across each term. Websites like GitHub make assigning technical tasks and following up with each other as painless as possible too. As the year progressed Julian took on more of the role as the project coordinator, but we all worked to hold each other accountable for our decided responsibilities. 
+   Working as a team for a time span as long as this project is almost another part of the homework requirements. Knowing each team members strengths and weaknesses helps with assigning tasks, and communicating regularly keeps thinks moving smoothly. Often, if one team member was struggling with something the others would be able to view the problem with their perspective and help find a solution, however this is only possible with good communication between all members. 
+   If I could redo the entire capstone class, I would've slowed down, stepped back, and looked at the grand scheme of the course more frequently. When you're racing to meet deadlines it can be hard to analyze your progress in meaningful ways, but if I had taken the time to access my situation more often I feel I would've saved a lot of time and effort in the end. While I did try to document my process as much as possible, I also highly value methodical documentation. I would have spent more time creating guides, summaries, and interfaces to assist myself for the portions of the project I worked on. In the end if I can't remember how to run the code I wrote the other week and didn't take the time to properly notate my work it wasn't very useful to begin with! 
+        
+
+\section{Appendix 1: Essential Code Listings}
+GitHub URL: https://github.com/julianweisbord/Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot \\
+Learning Code Essential File Paths: \\
+\indent src/learning/classify.py \\
+\indent src/learning/in\_resnet.py \\
+\indent src/learning/model.py \\
+\indent src/learning/sequential\_learning.py \\
+Data Capturing Code Essential File Paths: \\
+\indent src/image\_capture/lifelong\_object\_learning/src/data\_capture/capture\_data.py \\
+\indent src/image\_capture/lifelong\_object\_learning/src/launch/startup.launch \\
+
+%\bibliography{progress}
+%\bibliographystyle{IEEEtran}
+\end{document}
