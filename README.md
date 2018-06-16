@@ -20,7 +20,7 @@ Here is an example:
 ### 3. Set PYTHONPATH in your .bashrc
 	export PYTHONPATH=${PYTHONPATH}:~/Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot/src
 ### To quickly run the learning models
-1. Download the image files from https://drive.google.com/drive/folders/1BR0TPG5I_UDa_JNA9NSm8fQuZPBc4DZT?usp=sharing
+1. Download the image files from https://drive.google.com/drive/u/0/folders/1ckMi5N-IEOC9H05wyaM4D8t7p64UuS99
 and execute: mv ~/Downloads/image_data src/
 
 2. cd into src/learning and execute: python2 model.py [path to image directory]
