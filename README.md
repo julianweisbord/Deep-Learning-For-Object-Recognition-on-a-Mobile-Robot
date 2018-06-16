@@ -1,6 +1,7 @@
 # CS 461 Group 67 Repository by Julian Weisbord, Miles McCall, and Michael Rodriguez.
 
 For our senior design capstone project, we will build an image classifier on top of an autonomous robot. By leveraging ROS (Robot Operating System) and the existing mobile robot platform, we will provide a Convolutional Neural Network (CNN) model that utilizes online learning so that the robot can continuously learn to recognize objects in its environment.
+
 ## Results
 Classification Results using Inception ResNet (in_resnet.py):
 
@@ -10,8 +11,6 @@ To run the Inception ResNet Model on a novel set of images, run classify.py.
 Here is an example:
 
 ![Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot-classifications](https://raw.githubusercontent.com/julianweisbord/Deep-Learning-For-Object-Recognition-on-a-Mobile-Robot/master/docs/readme_imgs/classifications.png)
-
-
 
 ## Installation
 ### 1. git clone [this repo]
@@ -125,15 +124,17 @@ ON ROBOT SIDE
 
 5. Repeat Step 1
 
-6. Update class name and instance. Also update starting image index if necessary.  
-```
-	vim catkin_ws/src/lifelong_object_learning/src/data_capture/capture_data.py
-```
-7. Register Points in point cloud by clicking "register point" in top right of RVIZ GUI and put 4 points around the object.
+6. Register Points in point cloud by clicking "register point" in top right of RVIZ GUI and put 4 points around the object.
 
-8. Add marker to visualization by clicking add in bottom left of RVIZ GUI and look for /object_point_marker. Once added, you should see a blue dot appear where you clicked in RVIZ.
+7. Add marker to visualization by clicking add in bottom left of RVIZ GUI and look for /object_point_marker. Once added, you should see a blue dot appear where you clicked in RVIZ.
 
-9. Run capture_data.py to start data capturing process
+8. Run capture_data.py to start data capturing process with the --class and --number parameters set accordingly.
+
 ```
-	rosrun lifelong_learning capture_data.py    
+	rosrun lifelong_object_learning capture_data.py --class mug --number 1
+```
+or
+
+```
+	python path/to/capture_data.py --class mug --number 1
 ```
