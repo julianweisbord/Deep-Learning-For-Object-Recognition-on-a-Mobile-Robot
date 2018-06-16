@@ -1,8 +1,0 @@
-\select@language {english}
-\contentsline {section}{\numberline {1}Role}{2}
-\contentsline {section}{\numberline {2}What You Are Trying to Accomplish}{2}
-\contentsline {section}{\numberline {3}Tech Review}{2}
-\contentsline {subsection}{\numberline {3.1}Project Overview}{2}
-\contentsline {subsection}{\numberline {3.2}Overarching Classifier}{3}
-\contentsline {subsection}{\numberline {3.3}Sub Classifiers}{3}
-\contentsline {subsection}{\numberline {3.4}Overfitting in the Algorithms}{3}
