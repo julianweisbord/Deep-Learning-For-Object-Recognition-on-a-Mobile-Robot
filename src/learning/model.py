@@ -46,10 +46,6 @@ WEIGHTS = {
     'W_fc':tf.Variable(tf.random_normal([FC_NUM_FEATURES, FC_NEURON_SIZE]), name='w_fc'),
     'out':tf.Variable(tf.random_normal([FC_NEURON_SIZE, N_CLASSES]), name='w_softmax')}
 BIASES = {
-    # 'b_conv1':tf.Variable(tf.random_normal([32]), name='b1'),
-    # 'b_conv2':tf.Variable(tf.random_normal([64]), name='b2'),
-    # 'b_fc':tf.Variable(tf.random_normal([FC_NEURON_SIZE]), name='b_fc'),
-    # 'out':tf.Variable(tf.random_normal([N_CLASSES]), name='b_softmax')
     'b_conv1':tf.Variable(tf.constant(0.1, shape=[32]), name='b1'),
     'b_conv2':tf.Variable(tf.constant(0.1, shape=[64]), name='b2'),
     'b_fc':tf.Variable(tf.constant(0.1, shape=[FC_NEURON_SIZE]), name='b_fc'),
