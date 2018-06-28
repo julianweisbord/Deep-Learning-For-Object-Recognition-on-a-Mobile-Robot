@@ -62,7 +62,6 @@ def grab_dataset(dataset_path, classes=None, num_objects=0):
                 label[index] = 1.0
                 labels.append(label)
             file_paths.append(files)
-    # print("labels: ", labels)
 
     return file_paths, labels
 
@@ -106,7 +105,6 @@ def main():
 
     file_paths, labels = grab_dataset(prediction_data)
     predictions, correct_values = classify(file_paths, labels)
-    # print("Prediction: ", prediction)
 
 if __name__ == '__main__':
     main()
