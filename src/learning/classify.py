@@ -30,15 +30,9 @@ N_CLASSES = len(CLASSES)
 
 def grab_dataset(dataset_path, classes=None, num_objects=0):
     '''
-    # Description: This function grabs the collected image data from novel_image_prep.py
-    # Return: <Tuple of Datasets> The training and validation datasets.
-    # '''
-    # pred_data = PrepareData()
-    # dataset = pred_data.read_train_sets(dataset_path,
-    #                                     (IMAGE_WIDTH, IMAGE_HEIGHT),
-    #                                     validation_size=0, classes=None, num_objects=None)
-    # Check which object folders are actually in the train_path
-    # print("os.listdir: ", os.listdir(DEFAULT_DATA_PATH))
+    Description: This function grabs the collected image data from novel_image_prep.py
+    Return: <Tuple of Datasets> The training and validation datasets.
+    '''
     labels = []
     file_paths = []
     if not classes:
