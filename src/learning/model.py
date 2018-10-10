@@ -90,7 +90,6 @@ def model_setup(x, keep_prob):
         fc1 = tf.nn.dropout(fc1, keep_prob)
     # Final fully connected layer but without RELU
     with tf.name_scope('Prediction'):
-        # output = tf.Variable("softmax", shape=[None, 5], initializer=tf.zeros_initializer)
         output = tf.matmul(fc1, WEIGHTS['out']) + BIASES['out']
         print ("output", output)
         print("output shape:", output.shape)
